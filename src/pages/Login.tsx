@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { LogIn, ArrowLeft, Eye, EyeOff, Sparkles } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { showToast } from '../utils/toast';
+import React, { useState } from "react";
+import { LogIn, ArrowLeft, Eye, EyeOff, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { showToast } from "../utils/toast";
 
 export default function Login() {
   const navigate = useNavigate();
   const { dispatch } = useAuth();
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,48 +22,57 @@ export default function Login() {
     setTimeout(() => {
       // For demo purposes, accept any email/password
       const user = {
-        id: '1',
-        name: formData.email.split('@')[0],
-        email: formData.email
+        id: "1",
+        name: formData.email.split("@")[0],
+        email: formData.email,
       };
-      
-      dispatch({ type: 'SET_USER', payload: user });
+
+      dispatch({ type: "SET_USER", payload: user });
       showToast.success(`Chào mừng ${user.name}! Đăng nhập thành công`);
-      navigate('/');
+      navigate("/");
       setIsLoading(false);
     }, 1000);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-luxury flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-luxury flex items-center justify-center pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center fade-in-up">
-          <button
-            onClick={() => navigate('/')}
+          {/* <button
+            onClick={() => navigate("/")}
             className="flex items-center text-royal-400 hover:text-royal-300 mb-8 mx-auto transition-colors duration-300 font-body"
           >
             <ArrowLeft className="h-5 w-5 mr-2" />
             Quay lại trang chủ
-          </button>
-          
-          <div className="relative inline-flex items-center justify-center w-20 h-20 bg-gradient-royal rounded-2xl mb-6">
+          </button> */}
+
+          {/* <div className="relative inline-flex items-center justify-center w-20 h-20 bg-gradient-royal rounded-2xl mb-6">
             <LogIn className="h-10 w-10 text-white" />
             <Sparkles className="h-5 w-5 text-infinity-400 absolute -top-1 -right-1 animate-pulse" />
-          </div>
-          
-          <h2 className="text-4xl font-display font-bold text-gradient mb-2">Đăng nhập</h2>
+          </div> */}
+
+          <h2 className="text-4xl font-display font-bold text-gradient pb-2">
+            Đăng nhập
+          </h2>
           <p className="text-lg text-lavender-300 font-body">
             Chào mừng trở lại với Infinity Stay
           </p>
         </div>
 
         {/* Form */}
-        <form className="mt-8 space-y-6 fade-in-up" onSubmit={handleSubmit} style={{animationDelay: '0.2s'}}>
+        <form
+          className="mt-8 space-y-6 fade-in-up"
+          onSubmit={handleSubmit}
+          style={{ animationDelay: "0.2s" }}
+        >
           <div className="card-luxury rounded-2xl p-8">
             <div className="space-y-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-heading font-medium text-lavender-300 mb-3">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-heading font-medium text-lavender-300 mb-3"
+                >
                   Email
                 </label>
                 <input
@@ -72,24 +81,31 @@ export default function Login() {
                   type="email"
                   required
                   value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className="form-input w-full px-4 py-4 rounded-xl font-body"
                   placeholder="Nhập email của bạn"
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-heading font-medium text-lavender-300 mb-3">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-heading font-medium text-lavender-300 mb-3"
+                >
                   Mật khẩu
                 </label>
                 <div className="relative">
                   <input
                     id="password"
                     name="password"
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     required
                     value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
                     className="form-input w-full px-4 py-4 rounded-xl pr-12 font-body"
                     placeholder="Nhập mật khẩu"
                   />
@@ -98,7 +114,11 @@ export default function Login() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 top-4 text-lavender-400 hover:text-lavender-300 transition-colors duration-300"
                   >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -109,7 +129,9 @@ export default function Login() {
                     type="checkbox"
                     className="h-4 w-4 text-royal-500 border-lavender-600 rounded focus:ring-royal-500 bg-midnight-800"
                   />
-                  <span className="ml-3 text-sm text-lavender-300 font-body">Ghi nhớ đăng nhập</span>
+                  <span className="ml-3 text-sm text-lavender-300 font-body">
+                    Ghi nhớ đăng nhập
+                  </span>
                 </label>
                 <button
                   type="button"
@@ -130,7 +152,7 @@ export default function Login() {
                     Đang đăng nhập...
                   </span>
                 ) : (
-                  'Đăng nhập'
+                  "Đăng nhập"
                 )}
               </button>
             </div>
@@ -138,10 +160,10 @@ export default function Login() {
 
           <div className="text-center">
             <p className="text-lavender-300 font-body">
-              Chưa có tài khoản?{' '}
+              Chưa có tài khoản?{" "}
               <button
                 type="button"
-                onClick={() => navigate('/dang-ky')}
+                onClick={() => navigate("/dang-ky")}
                 className="text-royal-400 hover:text-royal-300 font-heading font-semibold transition-colors duration-300"
               >
                 Đăng ký ngay

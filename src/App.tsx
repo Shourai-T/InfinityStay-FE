@@ -14,6 +14,7 @@ const Confirmation = lazy(() => import("./pages/Confirmation"));
 const MyBookings = lazy(() => import("./pages/MyBookings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AboutUs = lazy(() => import("./pages/AboutUs/AboutUs"));
+const RoomDetail = lazy(() => import("./pages/RoomDetail"));
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/phong" element={<Rooms />} />
+            <Route path="/phong/:slug" element={<RoomDetail />} />
             <Route path="/about-us" element={<AboutUs />} />
             <Route path="/dang-nhap" element={<Login />} />
             <Route path="/dang-ky" element={<Register />} />

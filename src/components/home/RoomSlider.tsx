@@ -24,14 +24,19 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/effect-coverflow";
 import { flushSync } from "react-dom";
+import { useDispatch } from "react-redux";
+import { setRoomType } from "../../store/bookingSlice";
+import { RoomType } from "../../types";
 
 export const RoomSlider: React.FC = () => {
   const navigate = useNavigate();
   const prevRef = useRef<HTMLButtonElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
+  const dispatch = useDispatch();
 
-  const handleBookRoom = (slug: string) => {
-    navigate(`/phong/${slug}`);
+  const handleBookRoom = (type: RoomType) => {
+    dispatch(setRoomType(type));
+    navigate("/phong");
   };
 
   const getRoomTypeIcon = (type: string) => {
@@ -60,18 +65,10 @@ export const RoomSlider: React.FC = () => {
 
   return (
     <section className="py-20 relative overflow-hidden">
-      {/* Background Elements */}
-      {/* <div className="absolute top-10 left-10 animate-pulse">
-        <Sparkles className="h-8 w-8 text-royal-400 opacity-30" />
-      </div>
-      <div className="absolute bottom-20 right-20 animate-pulse delay-1000">
-        <Crown className="h-10 w-10 text-infinity-400 opacity-20" />
-      </div> */}
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16 fade-in-up">
-          <h2 className="text-4xl md:text-5xl font-display font-bold mb-6 text-gradient">
+          <h2 className="text-4xl md:text-5xl font-display font-bold pb-6 text-gradient">
             Khám phá loại phòng
           </h2>
           <p className="text-xl text-lavender-300 font-body max-w-3xl mx-auto leading-relaxed">
@@ -193,25 +190,6 @@ export const RoomSlider: React.FC = () => {
                         {room.type === "vip" ? "VIP" : room.type}
                       </span>
                     </div>
-
-                    {/* Rating */}
-                    <div className="absolute bottom-4 left-4 flex items-center space-x-2">
-                      <div className="flex items-center space-x-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            className={`h-4 w-4 ${
-                              star <= room.averageRating
-                                ? "text-infinity-400 fill-current"
-                                : "text-lavender-600"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-sm text-lavender-300 font-body">
-                        ({room.totalReviews})
-                      </span>
-                    </div>
                   </div>
 
                   {/* Room Content */}
@@ -252,7 +230,7 @@ export const RoomSlider: React.FC = () => {
 
                     {/* Action Button */}
                     <button
-                      onClick={() => handleBookRoom(room.slug)}
+                      onClick={() => handleBookRoom(room.type)}
                       className="btn-gold w-full py-4 px-6 rounded-xl font-heading font-bold text-lg group-hover:scale-105 transition-all duration-300 shadow-gold"
                     >
                       Đặt ngay
