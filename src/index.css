@@ -202,11 +202,147 @@ html {
   color: var(--lavender-gray);
 }
 
-/* Toast customization */
-.toast-container {
+.Toastify__toast-container {
   font-family: 'Poppins', sans-serif;
+  z-index: 9999;
 }
 
+.Toastify__toast {
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.Toastify__toast--success {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+}
+
+.Toastify__toast--error {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  color: white;
+}
+
+.Toastify__toast--warning {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: var(--midnight-blue);
+  font-weight: 600;
+}
+
+.Toastify__toast--info {
+  background: linear-gradient(135deg, var(--royal-purple) 0%, #8B5CF6 100%);
+  color: white;
+}
+
+.Toastify__toast--dark {
+  background: linear-gradient(135deg, var(--card-bg) 0%, var(--midnight-blue) 100%);
+  color: var(--soft-white);
+  border: 1px solid var(--border-color);
+}
+
+.Toastify__progress-bar {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.Toastify__progress-bar--success {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.Toastify__progress-bar--error {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.Toastify__progress-bar--warning {
+  background: var(--midnight-blue);
+}
+
+.Toastify__progress-bar--info {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.Toastify__close-button {
+  color: rgba(255, 255, 255, 0.8);
+  opacity: 0.8;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1;
+}
+
+/* Custom toast classes */
+.toast-success {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+}
+
+.toast-error {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important;
+}
+
+.toast-warning {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%) !important;
+}
+
+.toast-info {
+  background: linear-gradient(135deg, var(--royal-purple) 0%, #8B5CF6 100%) !important;
+}
+
+.toast-date-required {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+
+.toast-login-required {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+.toast-booking-success {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+.toast-room-booking-success {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+.toast-login-success {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+.toast-payment-processing {
+  background: linear-gradient(135deg, var(--royal-purple) 0%, #8B5CF6 100%) !important;
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+}
+
+/* Toast body styling */
+.toast-body {
+  padding: 0;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Toast progress bar */
+.toast-progress {
+  height: 4px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .Toastify__toast-container {
+    width: calc(100vw - 2rem);
+    left: 1rem;
+    right: 1rem;
+    margin: 0;
+  }
+  
+  .Toastify__toast {
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+  }
+}
 input[type="date"]::-webkit-calendar-picker-indicator {
   opacity: 0;
   cursor: pointer;
@@ -240,3 +376,34 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .swiper-slide-shadow-right {
   border-radius: 1.5rem;
 }
+
+
+.room-gallery-main .swiper-button-next,
+.room-gallery-main .swiper-button-prev {
+          color: #f59e0b !important;
+          background: rgba(30, 31, 63, 0.8) !important;
+          width: 44px !important;
+          height: 44px !important;
+          border-radius: 50% !important;
+          backdrop-filter: blur(10px) !important;
+        }
+
+.room-gallery-main .swiper-button-next::after,
+.room-gallery-main .swiper-button-prev::after {
+  font-size: 22px !important;
+}
+        
+.room-gallery-main .swiper-pagination-bullet {
+          background: #6366f1 !important;
+          opacity: 0.5 !important;
+        }
+        
+.room-gallery-main .swiper-pagination-bullet-active {
+          background: #f59e0b !important;
+          opacity: 1 !important;
+        }
+        
+.room-gallery-thumbs .swiper-slide-thumb-active img {
+          opacity: 1 !important;
+          border: 2px solid #f59e0b !important;
+        }

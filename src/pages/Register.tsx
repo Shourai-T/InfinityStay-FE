@@ -78,11 +78,11 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-luxury flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-luxury flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 lg:pb-20">
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center fade-in-up">
-          <button
+          {/* <button
             onClick={() => navigate("/")}
             className="flex items-center text-royal-400 hover:text-royal-300 mb-8 mx-auto transition-colors duration-300 font-body"
           >
@@ -92,9 +92,9 @@ export default function Register() {
 
           <div className="relative inline-flex items-center justify-center w-20 h-20 bg-gradient-royal rounded-2xl mb-6">
             <UserPlus className="h-10 w-10 text-white" />
-          </div>
+          </div> */}
 
-          <h2 className="text-4xl font-display font-bold text-gradient mb-2">
+          <h2 className="text-4xl font-display font-bold text-gradient pb-2">
             Đăng ký
           </h2>
           <p className="text-lg text-lavender-300 font-body">
