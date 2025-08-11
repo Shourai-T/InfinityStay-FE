@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt phòng thành công - Infinity Stay</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #0f1027;
+            color: #f8fafc;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #1a1b3a;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .booking-card {
+            background-color: #1e1f3f;
+            border: 1px solid #2d2e5f;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        .booking-id {
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            color: #0f1027;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .info-row {
+            margin-bottom: 15px;
+        }
+        .info-label {
+            color: #9ca3af;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .info-value {
+            color: #f8fafc;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .room-image {
+            width: 100%;
+            height: 200px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .price-total {
+            background-color: #2d2e5f;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .price-amount {
+            font-size: 28px;
+            font-weight: bold;
+            color: #f59e0b;
+        }
+        .reminder-box {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        .reminder-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
+        }
+        .reminder-text {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .checkin-info {
+            background-color: #1e1f3f;
+            border: 1px solid #6366f1;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .checkin-title {
+            color: #6366f1;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .checkin-item {
+            margin-bottom: 10px;
+            color: #d1d5db;
+        }
+        .contact-info {
+            background-color: #2d2e5f;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .contact-title {
+            color: #f59e0b;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .contact-item {
+            margin-bottom: 8px;
+            color: #d1d5db;
+        }
+        .footer {
+            background-color: #0f1027;
+            padding: 30px;
+            text-align: center;
+            color: #9ca3af;
+        }
+        .social-links {
+            margin: 20px 0;
+        }
+        .social-link {
+            display: inline-block;
+            margin: 0 10px;
+            color: #6366f1;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎉 Đặt phòng thành công!</h1>
+            <p>Cảm ơn bạn đã chọn Infinity Stay</p>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Booking ID -->
+            <div class="booking-id">
+                Mã đặt phòng: BK1234567890
+            </div>
+
+            <!-- Room Image -->
+            <img src="https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg?auto=compress&cs=tinysrgb&w=600" 
+                 alt="Room Image" class="room-image">
+
+            <!-- Booking Details -->
+            <div class="booking-card">
+                <div class="info-row">
+                    <div class="info-label">Loại phòng</div>
+                    <div class="info-value">Superior Double Room</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">Khách hàng</div>
+                    <div class="info-value">Nguyễn Văn A</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">Email</div>
+                    <div class="info-value">customer@example.com</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">Số điện thoại</div>
+                    <div class="info-value">+84 123 456 789</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">Ngày nhận phòng</div>
+                    <div class="info-value">15/02/2024 - 14:00</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">Ngày trả phòng</div>
+                    <div class="info-value">18/02/2024 - 12:00</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">Số đêm</div>
+                    <div class="info-value">3 đêm</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">Số khách</div>
+                    <div class="info-value">2 khách</div>
+                </div>
+            </div>
+
+            <!-- Total Price -->
+            <div class="price-total">
+                <div>Tổng thanh toán</div>
+                <div class="price-amount">5.400.000 VNĐ</div>
+            </div>
+
+            <!-- Check-in Reminder -->
+            <div class="reminder-box">
+                <div class="reminder-title">🔔 Nhắc nhở quan trọng</div>
+                <div class="reminder-text">
+                    Còn 2 ngày nữa đến ngày nhận phòng của bạn!<br>
+                    Vui lòng chuẩn bị CMND/CCCD và có mặt đúng giờ.
+                </div>
+            </div>
+
+            <!-- Check-in Instructions -->
+            <div class="checkin-info">
+                <div class="checkin-title">📋 Hướng dẫn nhận phòng</div>
+                <div class="checkin-item">• Nhận phòng từ 14:00, trả phòng trước 12:00</div>
+                <div class="checkin-item">• Mang theo CMND/CCCD và mã đặt phòng</div>
+                <div class="checkin-item">• Liên hệ lễ tân nếu cần hỗ trợ</div>
+                <div class="checkin-item">• Hủy miễn phí trước 24 giờ</div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="contact-info">
+                <div class="contact-title">📞 Thông tin liên hệ</div>
+                <div class="contact-item">📍 123 Đường Luxury, Quận 1, TP.HCM</div>
+                <div class="contact-item">☎️ Hotline: +84 28 1234 5678</div>
+                <div class="contact-item">✉️ Email: concierge@infinitystay.vn</div>
+                <div class="contact-item">🌐 Website: www.infinitystay.vn</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div>
+                <strong>Infinity Stay</strong><br>
+                Where comfort meets infinity
+            </div>
+            
+            <div class="social-links">
+                <a href="#" class="social-link">Facebook</a>
+                <a href="#" class="social-link">Instagram</a>
+                <a href="#" class="social-link">Twitter</a>
+            </div>
+            
+            <div>
+                © 2024 Infinity Stay. All rights reserved.<br>
+                Bạn nhận được email này vì đã đặt phòng tại khách sạn của chúng tôi.
+            </div>
+        </div>
+    </div>
+</body>
+</html>
