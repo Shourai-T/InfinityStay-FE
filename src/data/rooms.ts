@@ -19,17 +19,17 @@ export const rooms: Room[] = [
     fullDescription: 'Phòng Deluxe Single được thiết kế dành riêng cho khách doanh nhân và du khách một mình. Không gian 25m² được bố trí thông minh với khu vực làm việc riêng biệt, giường đơn cao cấp và view thành phố tuyệt đẹp. Phòng được trang bị đầy đủ tiện nghi hiện đại cùng dịch vụ 24/7.',
     features: [
       {
-        icon: '🏢',
+        icon: 'Building',
         title: 'City View',
         description: 'Tầm nhìn panorama ra trung tâm thành phố'
       },
       {
-        icon: '💼',
+        icon: 'Briefcase',
         title: 'Business Ready',
         description: 'Khu vực làm việc riêng với WiFi tốc độ cao'
       },
       {
-        icon: '🛏️',
+        icon: 'BedSingle',
         title: 'Premium Bedding',
         description: 'Giường đơn cao cấp với đệm memory foam'
       }
@@ -69,17 +69,17 @@ export const rooms: Room[] = [
     fullDescription: 'Superior Double Room mang đến không gian nghỉ dưỡng lý tưởng cho cặp đôi. Với diện tích 35m², phòng có ban công riêng biệt, giường đôi king-size và khu vực thư giãn thoải mái. Thiết kế nội thất hiện đại kết hợp với các tiện nghi cao cấp tạo nên trải nghiệm nghỉ dưỡng hoàn hảo.',
     features: [
       {
-        icon: '🌅',
+        icon: 'Sunset',
         title: 'Private Balcony',
         description: 'Ban công riêng với view thành phố tuyệt đẹp'
       },
       {
-        icon: '🛁',
+        icon: 'Bath',
         title: 'Luxury Bathroom',
         description: 'Phòng tắm cao cấp với bồn tắm riêng'
       },
       {
-        icon: '👫',
+        icon: 'Heart',
         title: 'Romantic Setting',
         description: 'Không gian lãng mạn dành cho cặp đôi'
       }
@@ -119,17 +119,17 @@ export const rooms: Room[] = [
     fullDescription: 'Executive Suite là lựa chọn hoàn hảo cho gia đình hoặc nhóm bạn. Với 65m² được chia thành các khu vực riêng biệt: phòng ngủ master, phòng khách rộng rãi, bếp nhỏ đầy đủ tiện nghi và khu vực làm việc. Thiết kế sang trọng với nội thất cao cấp và dịch vụ butler chuyên nghiệp.',
     features: [
       {
-        icon: '🏠',
+        icon: 'Sofa',
         title: 'Separate Living Area',
         description: 'Phòng khách riêng biệt với sofa cao cấp'
       },
       {
-        icon: '👨‍🍳',
+        icon: 'UtensilsCrossed',
         title: 'Kitchenette',
         description: 'Bếp nhỏ đầy đủ tiện nghi nấu nướng'
       },
       {
-        icon: '🛎️',
+        icon: 'Bell',
         title: 'Butler Service',
         description: 'Dịch vụ butler cá nhân 24/7'
       }
@@ -169,17 +169,17 @@ export const rooms: Room[] = [
     fullDescription: 'Presidential VIP Suite - đỉnh cao của sự sang trọng tại Infinity Stay. Với 120m² được thiết kế như một căn penthouse, suite có tầm nhìn panorama 360 độ, jacuzzi riêng trên ban công, phòng ăn riêng và dịch vụ concierge cá nhân. Đây là lựa chọn hoàn hảo cho những dịp đặc biệt và khách VIP.',
     features: [
       {
-        icon: '🌆',
+        icon: 'Landmark',
         title: 'Panoramic View',
         description: 'Tầm nhìn 360 độ ra toàn thành phố'
       },
       {
-        icon: '🛁',
+        icon: 'Bath',
         title: 'Private Jacuzzi',
         description: 'Jacuzzi riêng trên ban công với view tuyệt đẹp'
       },
       {
-        icon: '🥂',
+        icon: 'GlassWater',
         title: 'VIP Concierge',
         description: 'Dịch vụ concierge cá nhân cao cấp'
       }

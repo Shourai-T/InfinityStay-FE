@@ -64,7 +64,7 @@ export const showToast = {
   },
 
   loginRequired: () => {
-    toast.warning("👤 Vui lòng đăng nhập để đặt phòng", {
+    toast.warning("Vui lòng đăng nhập để đặt phòng", {
       ...warningOptions,
       autoClose: 5000,
       className: "toast-login-required",
@@ -72,7 +72,7 @@ export const showToast = {
   },
 
   bookingSuccess: (bookingId: string) => {
-    toast.success(`🎉 Đặt phòng thành công! Mã đặt phòng: ${bookingId}`, {
+    toast.success(`Đặt phòng thành công! Mã đặt phòng: ${bookingId}`, {
       ...successOptions,
       autoClose: 6000,
       className: "toast-booking-success",

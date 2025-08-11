@@ -28,11 +28,15 @@ import "swiper/css/thumbs";
 import "swiper/css/free-mode";
 import { rooms } from "../data/rooms.ts";
 import { generateRoomSlug } from "../utils/slugify.ts";
+import { useDispatch } from "react-redux";
+import { setSelectedRoom } from "../store/bookingSlice.ts";
+import * as Icons from "lucide-react";
 
 export default function RoomDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { state: authState } = useAuth();
+  const dispatch = useDispatch();
 
   const [room, setRoom] = useState<Room | null>(null);
   const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
@@ -105,42 +109,9 @@ export default function RoomDetailPage() {
     }, 1000);
   };
 
-  const renderStars = (
-    rating: number,
-    interactive = false,
-    onRatingChange?: (rating: number) => void
-  ) => {
-    return (
-      <div className="flex items-center space-x-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <button
-            key={star}
-            type={interactive ? "button" : undefined}
-            onClick={
-              interactive && onRatingChange
-                ? () => onRatingChange(star)
-                : undefined
-            }
-            className={`${
-              interactive
-                ? "cursor-pointer hover:scale-110 transition-transform duration-200"
-                : ""
-            }`}
-            disabled={!interactive}
-          >
-            <Star
-              className={`h-5 w-5 ${
-                star <= rating
-                  ? "text-infinity-400 fill-current"
-                  : interactive
-                  ? "text-lavender-600 hover:text-infinity-300"
-                  : "text-lavender-600"
-              }`}
-            />
-          </button>
-        ))}
-      </div>
-    );
+  const handleBooking = () => {
+    dispatch(setSelectedRoom(room));
+    navigate("/dat-phong");
   };
 
   if (!room) {
@@ -241,20 +212,27 @@ export default function RoomDetailPage() {
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {room.features.map((feature, index) => (
-                  <div
-                    key={index}
-                    className="text-center p-4 bg-midnight-800/50 rounded-xl"
-                  >
-                    <div className="text-3xl mb-3">{feature.icon}</div>
-                    <h3 className="font-heading font-semibold text-soft-white mb-2">
-                      {feature.title}
-                    </h3>
-                    <p className="text-sm text-lavender-400 font-body">
-                      {feature.description}
-                    </p>
-                  </div>
-                ))}
+                {room.features.map((feature, index) => {
+                  const IconComponent = Icons[
+                    feature.icon as keyof typeof Icons
+                  ] as React.ElementType;
+                  return (
+                    <div
+                      key={index}
+                      className="text-center p-4 bg-midnight-800/50 rounded-xl"
+                    >
+                      <div className="flex justify-center text-3xl mb-3">
+                        {IconComponent ? <IconComponent /> : feature.icon}
+                      </div>
+                      <h3 className="font-heading font-semibold text-soft-white mb-2">
+                        {feature.title}
+                      </h3>
+                      <p className="text-sm text-lavender-400 font-body">
+                        {feature.description}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -298,9 +276,6 @@ export default function RoomDetailPage() {
                     <label className="block text-sm font-heading font-medium text-lavender-300 mb-2">
                       Đánh giá của bạn
                     </label>
-                    {renderStars(newReview.rating, true, (rating) =>
-                      setNewReview({ ...newReview, rating })
-                    )}
                   </div>
 
                   <div className="mb-4">
@@ -410,7 +385,7 @@ export default function RoomDetailPage() {
               </div>
 
               <button
-                onClick={() => navigate("/dat-phong")}
+                onClick={handleBooking}
                 className="btn-gold w-full py-4 px-6 rounded-xl font-heading font-bold text-lg mb-4"
               >
                 Đặt phòng ngay

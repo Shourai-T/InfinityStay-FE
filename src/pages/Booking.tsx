@@ -8,7 +8,9 @@ import {
   Phone,
   Mail,
   MessageSquare,
+  ChevronDownIcon,
 } from "lucide-react";
+import * as Icons from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useBooking } from "../contexts/BookingContext";
@@ -19,22 +21,30 @@ import {
   formatDate,
   generateBookingId,
 } from "../utils/dateUtils";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../store";
+import { addBooking } from "../store/bookingSlice";
 
 export default function Booking() {
   const navigate = useNavigate();
-  const { state: authState } = useAuth();
-  const { state: bookingState, dispatch: bookingDispatch } = useBooking();
+  const dispatch = useDispatch();
+
+  const { selectedRoom, dateRange, guests } = useSelector(
+    (state: RootState) => state.booking
+  );
+  const { user } = useSelector((state: RootState) => state.auth);
+
   const [bookingData, setBookingData] = useState({
-    guestName: authState.user?.name || "",
-    guestEmail: authState.user?.email || "",
-    guestPhone: authState.user?.phone || "",
-    guests: 1,
+    guestName: user?.name || "",
+    guestEmail: user?.email || "",
+    guestPhone: user?.phone || "",
+    guests: guests || 1,
     specialRequests: "",
-    paymentMethod: "online",
+    paymentMethod: "online" as "online" | "onsite",
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  if (!bookingState.selectedRoom || !bookingState.dateRange) {
+  if (!selectedRoom || !dateRange) {
     return (
       <div className="min-h-screen bg-gradient-luxury flex items-center justify-center">
         <div className="text-center card-luxury rounded-2xl p-12">
@@ -52,16 +62,13 @@ export default function Booking() {
     );
   }
 
-  const nights = calculateNights(
-    bookingState.dateRange.checkIn,
-    bookingState.dateRange.checkOut
-  );
-  const totalPrice = bookingState.selectedRoom.price * nights;
+  const nights = calculateNights(dateRange.checkIn, dateRange.checkOut);
+  const totalPrice = selectedRoom.price * nights;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!authState.user) {
+    if (!user) {
       showToast.loginRequired();
       navigate("/dang-nhap");
       return;
@@ -69,14 +76,13 @@ export default function Booking() {
 
     setIsLoading(true);
 
-    // Simulate booking process
     setTimeout(() => {
       const booking = {
         id: generateBookingId(),
-        roomId: bookingState.selectedRoom!.id,
-        roomName: bookingState.selectedRoom!.name,
-        checkIn: bookingState.dateRange!.checkIn,
-        checkOut: bookingState.dateRange!.checkOut,
+        roomId: selectedRoom.id,
+        roomName: selectedRoom.name,
+        checkIn: dateRange.checkIn,
+        checkOut: dateRange.checkOut,
         guests: bookingData.guests,
         guestName: bookingData.guestName,
         guestEmail: bookingData.guestEmail,
@@ -84,15 +90,24 @@ export default function Booking() {
         specialRequests: bookingData.specialRequests,
         totalPrice,
         status: "confirmed" as const,
-        paymentMethod: bookingData.paymentMethod as "online" | "onsite",
+        paymentMethod: bookingData.paymentMethod,
         createdAt: new Date().toISOString(),
       };
 
-      bookingDispatch({ type: "ADD_BOOKING", payload: booking });
+      // Lưu booking vào redux
+      dispatch(addBooking(booking));
+
       showToast.bookingSuccess(booking.id);
       navigate("/xac-nhan");
       setIsLoading(false);
     }, 2000);
+  };
+
+  const handlePaymentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBookingData((prev) => ({
+      ...prev,
+      paymentMethod: e.target.value as "online" | "onsite",
+    }));
   };
 
   return (
@@ -206,10 +221,10 @@ export default function Booking() {
                             guests: parseInt(e.target.value),
                           })
                         }
-                        className="form-input w-full pl-12 pr-4 py-4 rounded-xl font-body"
+                        className="form-input w-full pl-12 pr-4 py-4 rounded-xl font-body appearance-none"
                       >
                         {Array.from(
-                          { length: bookingState.selectedRoom.maxGuests },
+                          { length: selectedRoom.maxGuests },
                           (_, i) => i + 1
                         ).map((num) => (
                           <option
@@ -221,6 +236,7 @@ export default function Booking() {
                           </option>
                         ))}
                       </select>
+                      <ChevronDownIcon className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-royal-400 pointer-events-none" />
                     </div>
                   </div>
                 </div>
@@ -261,12 +277,7 @@ export default function Booking() {
                       name="paymentMethod"
                       value="online"
                       checked={bookingData.paymentMethod === "online"}
-                      onChange={(e) =>
-                        setBookingData({
-                          ...bookingData,
-                          paymentMethod: e.target.value,
-                        })
-                      }
+                      onChange={handlePaymentChange}
                       className="h-5 w-5 text-royal-500 border-royal-400 focus:ring-royal-500 bg-midnight-800"
                     />
                     <div className="ml-4">
@@ -285,12 +296,7 @@ export default function Booking() {
                       name="paymentMethod"
                       value="onsite"
                       checked={bookingData.paymentMethod === "onsite"}
-                      onChange={(e) =>
-                        setBookingData({
-                          ...bookingData,
-                          paymentMethod: e.target.value,
-                        })
-                      }
+                      onChange={handlePaymentChange}
                       className="h-5 w-5 text-royal-500 border-royal-400 focus:ring-royal-500 bg-midnight-800"
                     />
                     <div className="ml-4">
@@ -333,8 +339,8 @@ export default function Booking() {
               {/* Room Image */}
               <div className="mb-6">
                 <img
-                  src={bookingState.selectedRoom.images[0]}
-                  alt={bookingState.selectedRoom.name}
+                  src={selectedRoom.images[0]}
+                  alt={selectedRoom.name}
                   className="w-full h-40 object-cover rounded-xl"
                 />
               </div>
@@ -343,19 +349,19 @@ export default function Booking() {
               <div className="space-y-4 mb-6">
                 <div>
                   <h3 className="font-heading font-semibold text-soft-white text-lg">
-                    {bookingState.selectedRoom.name}
+                    {selectedRoom.name}
                   </h3>
                   <p className="text-sm text-lavender-400 font-body">
-                    {bookingState.selectedRoom.area}m² • Tối đa{" "}
-                    {bookingState.selectedRoom.maxGuests} khách
+                    {selectedRoom.area}m² • Tối đa {selectedRoom.maxGuests}{" "}
+                    khách
                   </p>
                 </div>
 
                 <div className="flex items-center text-sm text-lavender-300 font-body">
                   <Calendar className="h-4 w-4 mr-2 text-royal-400" />
                   <span>
-                    {formatDate(bookingState.dateRange.checkIn)} -{" "}
-                    {formatDate(bookingState.dateRange.checkOut)}
+                    {formatDate(dateRange.checkIn)} -{" "}
+                    {formatDate(dateRange.checkOut)}
                   </span>
                 </div>
 
@@ -368,11 +374,10 @@ export default function Booking() {
               <div className="border-t border-royal-500/30 pt-6 space-y-3">
                 <div className="flex justify-between text-sm font-body">
                   <span className="text-lavender-300">
-                    {formatCurrency(bookingState.selectedRoom.price)} x {nights}{" "}
-                    đêm
+                    {formatCurrency(selectedRoom.price)} x {nights} đêm
                   </span>
                   <span className="text-soft-white">
-                    {formatCurrency(bookingState.selectedRoom.price * nights)}
+                    {formatCurrency(selectedRoom.price * nights)}
                   </span>
                 </div>
 
@@ -397,20 +402,17 @@ export default function Booking() {
                   Tiện nghi phòng
                 </h4>
                 <div className="space-y-1">
-                  {bookingState.selectedRoom.amenities
-                    .slice(0, 4)
-                    .map((amenity, index) => (
-                      <div
-                        key={index}
-                        className="text-sm text-lavender-300 font-body"
-                      >
-                        • {amenity}
-                      </div>
-                    ))}
-                  {bookingState.selectedRoom.amenities.length > 4 && (
+                  {selectedRoom.amenities.slice(0, 4).map((amenity, index) => (
+                    <div
+                      key={index}
+                      className="text-sm text-lavender-300 font-body"
+                    >
+                      • {amenity}
+                    </div>
+                  ))}
+                  {selectedRoom.amenities.length > 4 && (
                     <div className="text-sm text-royal-400 font-body">
-                      +{bookingState.selectedRoom.amenities.length - 4} tiện
-                      nghi khác
+                      +{selectedRoom.amenities.length - 4} tiện nghi khác
                     </div>
                   )}
                 </div>
