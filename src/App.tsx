@@ -9,6 +9,9 @@ const Home = lazy(() => import("./pages/Home"));
 const Rooms = lazy(() => import("./pages/Rooms"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const VerifyOTP = lazy(() => import("./pages/VerifyOTP"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Booking = lazy(() => import("./pages/Booking"));
 const Confirmation = lazy(() => import("./pages/Confirmation"));
 const MyBookings = lazy(() => import("./pages/MyBookings"));
@@ -28,6 +31,9 @@ function App() {
             <Route path="/about-us" element={<AboutUs />} />
             <Route path="/dang-nhap" element={<Login />} />
             <Route path="/dang-ky" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/verify-otp" element={<VerifyOTP />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/dat-phong" element={<Booking />} />
             <Route path="/xac-nhan" element={<Confirmation />} />
             <Route path="/dat-phong-cua-toi" element={<MyBookings />} />
