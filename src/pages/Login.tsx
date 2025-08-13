@@ -39,19 +39,6 @@ export default function Login() {
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center fade-in-up">
-          {/* <button
-            onClick={() => navigate("/")}
-            className="flex items-center text-royal-400 hover:text-royal-300 mb-8 mx-auto transition-colors duration-300 font-body"
-          >
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Quay lại trang chủ
-          </button> */}
-
-          {/* <div className="relative inline-flex items-center justify-center w-20 h-20 bg-gradient-royal rounded-2xl mb-6">
-            <LogIn className="h-10 w-10 text-white" />
-            <Sparkles className="h-5 w-5 text-infinity-400 absolute -top-1 -right-1 animate-pulse" />
-          </div> */}
-
           <h2 className="text-4xl font-display font-bold text-gradient pb-2">
             Đăng nhập
           </h2>
@@ -135,6 +122,7 @@ export default function Login() {
                 </label>
                 <button
                   type="button"
+                  onClick={() => navigate("/forgot-password")}
                   className="text-sm text-royal-400 hover:text-royal-300 transition-colors duration-300 font-body"
                 >
                   Quên mật khẩu?
