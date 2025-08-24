@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { UserPlus, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
 import { showToast } from "../utils/toast";
+import { authService } from "../services/authService";
 
 export default function Register() {
   const navigate = useNavigate();
-  const { dispatch } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -52,29 +51,60 @@ export default function Register() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const splitName = (fullName: string) => {
+    const nameParts = fullName.trim().split(/\s+/);
+    if (nameParts.length === 1) {
+      return {
+        firstName: nameParts[0],
+        lastName: "",
+      };
+    }
+    const lastName = nameParts[0]; // Lấy chữ đầu tiên làm họ
+    const firstName = nameParts.slice(1).join(" "); // Phần còn lại làm tên
+    return { firstName, lastName };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateForm()) return;
 
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      const user = {
-        id: Date.now().toString(),
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
+    try {
+      const { name, phone, ...rest } = formData;
+      const { firstName, lastName } = splitName(name);
+
+      const registerData = {
+        firstName,
+        lastName,
+        email: rest.email,
+        phoneNumber: phone,
+        password: rest.password,
+        confirmPassword: rest.confirmPassword,
       };
 
-      dispatch({ type: "SET_USER", payload: user });
-      showToast.success(
-        `Chào mừng ${user.name}! Tài khoản đã được tạo thành công`
-      );
-      navigate("/");
+      console.log("Submitting registration data:", registerData);
+
+      const response = await authService.register(registerData);
+      console.log("Registration response:", response);
+
+      showToast.success("Đăng ký thành công! Vui lòng xác thực email của bạn");
+
+      // Điều hướng với dữ liệu từ response
+      navigate("/verify-otp", {
+        state: {
+          email: formData.email,
+          type: "register",
+          userId: response.data?.data?.id || response.user?.id, // Kiểm tra cả 2 vị trí có thể chứa ID
+        },
+      });
+    } catch (error: any) {
+      const errorMessage = error.message || "Đăng ký thất bại";
+      showToast.error(`Đăng ký thất bại: ${errorMessage}`);
+      console.error("Registration error:", error);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (

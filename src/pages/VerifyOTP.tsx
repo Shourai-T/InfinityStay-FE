@@ -3,13 +3,23 @@ import { Shield, ArrowLeft, RefreshCw } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { showToast } from "../utils/toast";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  verifyOtp,
+  resendOtp,
+  verifyForgotPasswordOtp,
+} from "../store/authSlice";
+import type { RootState, AppDispatch } from "../store";
+
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://infinity-stay.mtri.online/api";
 
 export default function VerifyOTP() {
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { dispatch } = useAuth();
+  const { isLoading, error } = useSelector((state: RootState) => state.auth);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [isLoading, setIsLoading] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -56,17 +66,16 @@ export default function VerifyOTP() {
   };
 
   const handleResendOTP = async () => {
-    if (!canResend) return;
+    if (!canResend || !email) return;
 
-    setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await dispatch(resendOtp({ email, type })).unwrap();
       showToast.success("Mã OTP mới đã được gửi");
       setCountdown(60);
       setCanResend(false);
-      setIsLoading(false);
-    }, 1000);
+    } catch (error: any) {
+      showToast.error(error || "Không thể gửi lại mã OTP");
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,25 +87,46 @@ export default function VerifyOTP() {
       return;
     }
 
-    setIsLoading(true);
+    try {
+      let verifyData = {
+        email,
+        otp: otpCode,
+        type,
+      };
 
-    // Simulate API call
-    setTimeout(() => {
+      let url = "";
       if (type === "register") {
-        const user = {
-          id: Date.now().toString(),
-          name: email.split("@")[0],
-          email: email,
-        };
-        dispatch({ type: "SET_USER", payload: user });
-        showToast.success("Đăng ký thành công!");
-        navigate("/");
-      } else {
-        // For forgot password, go to new password page
-        navigate("/reset-password", { state: { email, otpVerified: true } });
+        url = API_URL + "/auth/verify-otp";
+      } else if (type === "forgot-password") {
+        url = API_URL + "/auth/verify-otp-forgot-password";
       }
-      setIsLoading(false);
-    }, 1500);
+
+      console.log("Verifying OTP:", { url, data: verifyData });
+
+      let result;
+      if (type === "forgot-password") {
+        result = await dispatch(verifyForgotPasswordOtp(verifyData)).unwrap();
+      } else {
+        result = await dispatch(verifyOtp(verifyData)).unwrap();
+      }
+
+      if (result.statusCode === 201) {
+        showToast.success(result.result.message || "Xác thực thành công!");
+
+        if (type === "forgot-password") {
+          // Sau khi xác thực OTP quên mật khẩu, chuyển tới trang đặt lại mật khẩu
+          navigate("/reset-password", {
+            state: { email, resetToken: result.result.resetToken },
+          });
+        } else {
+          // Sau khi verify đăng ký -> về đăng nhập
+          navigate("/dang-nhap");
+        }
+      }
+    } catch (error: any) {
+      console.error("Verify OTP error:", error);
+      showToast.error(error?.message || "Xác thực thất bại");
+    }
   };
 
   return (

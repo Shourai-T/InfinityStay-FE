@@ -16,8 +16,8 @@ import {
 } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Thumbs, FreeMode } from "swiper/modules";
-import { useAuth } from "../contexts/AuthContext";
-import { formatCurrency } from "../utils/dateUtils";
+import { useAuth } from "../contexts/AuthContext.tsx";
+import { formatCurrency, formatDate } from "../utils/dateUtils.ts";
 import { showToast } from "../utils/toast.tsx";
 import { Room } from "../types/index.ts";
 
@@ -28,89 +28,126 @@ import "swiper/css/thumbs";
 import "swiper/css/free-mode";
 import { rooms } from "../data/rooms.ts";
 import { generateRoomSlug } from "../utils/slugify.ts";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setSelectedRoom } from "../store/bookingSlice.ts";
 import * as Icons from "lucide-react";
+import { roomsService } from "../services/roomsService.ts";
+import axios from "axios";
+import { RootState } from "../store/index.ts";
 
 export default function RoomDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { state: authState } = useAuth();
+  const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch();
-
+  const state = useSelector((state: RootState) => state);
   const [room, setRoom] = useState<Room | null>(null);
   const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
-  const [newReview, setNewReview] = useState({
-    rating: 5,
-    comment: "",
-  });
+  const [newReview, setNewReview] = useState({ comment: "" });
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const idFromSlug = slug ? slug.split("-")[0] : "";
 
   useEffect(() => {
     if (!slug) return;
+    console.log("Fetching room detail for slug:", slug);
 
     const idFromSlug = slug.split("-")[0];
+    console.log("Fetching room with ID:", idFromSlug);
 
-    // Tìm theo ID
-    const foundRoom = rooms.find((r) => r.id === idFromSlug);
+    const fetchRoom = async () => {
+      try {
+        setLoading(true);
+        const fetchedRoom = await roomsService.getRoomById(idFromSlug);
+        if (!fetchedRoom) {
+          navigate("/404");
+          return;
+        }
+        setRoom(fetchedRoom);
 
-    if (foundRoom) {
-      setRoom(foundRoom);
-
-      // Nếu slug trên URL không trùng với slug thực tế → điều hướng lại URL đúng
-      const correctSlug = generateRoomSlug(foundRoom);
-      if (slug !== correctSlug) {
-        navigate(`/phong/${correctSlug}`, { replace: true });
+        // Nếu slug trên URL không trùng với slug thực tế → điều hướng lại URL đúng
+        const correctSlug = generateRoomSlug(fetchedRoom);
+        if (slug !== correctSlug) {
+          navigate(`/phong/${correctSlug}`, { replace: true });
+        }
+      } catch (error) {
+        console.error("Failed to fetch room detail:", error);
+        navigate("/404");
+      } finally {
+        setLoading(false);
       }
-    } else {
-      navigate("/404");
-    }
+    };
+
+    fetchRoom();
   }, [slug, navigate]);
+
+  useEffect(() => {
+    if (!slug) return;
+    const fetchReviews = async () => {
+      try {
+        setLoadingReviews(true);
+        const res = await axios.get(
+          `https://infinity-stay.mtri.online/api/comments/room/${idFromSlug}`
+        );
+        // Giả sử API trả về { result: [...] }
+        const reviewData = res.data.result || [];
+        console.log("Fetched reviews:", reviewData);
+        setReviews(reviewData);
+      } catch (err) {
+        console.error("Failed to fetch reviews:", err);
+        setReviews([]);
+      } finally {
+        setLoadingReviews(false);
+      }
+    };
+    fetchReviews();
+  }, [slug]);
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!authState.user) {
+    if (!user) {
       showToast.loginRequired();
       navigate("/dang-nhap");
       return;
     }
-
     if (!newReview.comment.trim()) {
       showToast.error("Vui lòng nhập nội dung đánh giá");
       return;
     }
 
     setIsSubmittingReview(true);
+    try {
+      // Gọi API gửi review nếu có backend endpoint
+      // await roomsService.addReview(room!.id, { ...newReview, userId: authState.user.id });
+      await axios.post(
+        "https://infinity-stay.mtri.online/api/comments",
+        {
+          room: idFromSlug, // ID phòng hiện tại
+          userEmail: user.email, // Email người dùng
+          content: newReview.comment.trim(), // Nội dung đánh giá
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${state.auth.token}`,
+          },
+        }
+      );
 
-    // Simulate API call
-    setTimeout(() => {
-      const review = {
-        id: Date.now().toString(),
-        userName: authState.user!.name,
-        rating: newReview.rating,
-        comment: newReview.comment,
-        date: new Date().toISOString().split("T")[0],
-        verified: true,
-      };
-
-      // Add review to room (in real app, this would be API call)
-      if (room) {
-        setRoom({
-          ...room,
-          reviews: [review, ...room.reviews],
-          totalReviews: room.totalReviews + 1,
-        });
-      }
-
-      setNewReview({ rating: 5, comment: "" });
       showToast.success("Đánh giá của bạn đã được gửi thành công!");
+      setNewReview({ comment: "" });
+    } catch (err) {
+      showToast.error("Gửi đánh giá thất bại");
+    } finally {
       setIsSubmittingReview(false);
-    }, 1000);
+    }
   };
 
   const handleBooking = () => {
     dispatch(setSelectedRoom(room));
+    console.log("Selected room for booking:", room);
     navigate("/dat-phong");
   };
 
@@ -139,12 +176,6 @@ export default function RoomDetailPage() {
               {room.name}
             </h1>
             <div className="flex items-center mt-2 space-x-4">
-              {/* <div className="flex items-center space-x-1">
-                {renderStars(room.averageRating)}
-                <span className="text-lavender-300 font-body ml-2">
-                  {room.averageRating.toFixed(1)} ({room.totalReviews} đánh giá)
-                </span>
-              </div> */}
               <span className="text-2xl font-heading font-bold text-infinity-400">
                 {formatCurrency(room.price)}/đêm
               </span>
@@ -170,7 +201,7 @@ export default function RoomDetailPage() {
                 }}
                 className="room-gallery-main h-96"
               >
-                {room.images.map((image, index) => (
+                {room.image.map((image, index) => (
                   <SwiperSlide key={index}>
                     <img
                       src={image}
@@ -190,7 +221,7 @@ export default function RoomDetailPage() {
                 watchSlidesProgress={true}
                 className="room-gallery-thumbs h-24 mt-4 px-4 pb-4"
               >
-                {room.images.map((image, index) => (
+                {room.image.map((image, index) => (
                   <SwiperSlide key={index} className="cursor-pointer">
                     <img
                       src={image}
@@ -211,7 +242,7 @@ export default function RoomDetailPage() {
                 {room.fullDescription}
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {room.features.map((feature, index) => {
                   const IconComponent = Icons[
                     feature.icon as keyof typeof Icons
@@ -233,7 +264,7 @@ export default function RoomDetailPage() {
                     </div>
                   );
                 })}
-              </div>
+              </div> */}
             </div>
 
             {/* Amenities */}
@@ -259,11 +290,11 @@ export default function RoomDetailPage() {
             {/* Reviews Section */}
             <div className="card-luxury rounded-2xl p-8">
               <h2 className="text-2xl font-heading font-bold mb-6 text-soft-white">
-                Đánh giá từ khách hàng ({room.totalReviews})
+                Đánh giá từ khách hàng ({reviews.length})
               </h2>
 
               {/* Review Form */}
-              {authState.user ? (
+              {user ? (
                 <form
                   onSubmit={handleSubmitReview}
                   className="mb-8 p-6 bg-midnight-800/50 rounded-xl border border-royal-500/20"
@@ -328,7 +359,7 @@ export default function RoomDetailPage() {
 
               {/* Reviews List */}
               <div className="space-y-6">
-                {room.reviews.map((review) => (
+                {reviews.map((review) => (
                   <div
                     key={review.id}
                     className="p-6 bg-midnight-800/30 rounded-xl border border-lavender-800/20"
@@ -337,25 +368,25 @@ export default function RoomDetailPage() {
                       <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-gradient-royal rounded-full flex items-center justify-center">
                           <span className="text-white font-heading font-semibold">
-                            {review.userName.charAt(0)}
+                            {review.userEmail.charAt(0)}
                           </span>
                         </div>
                         <div>
                           <div className="flex items-center space-x-2">
                             <h4 className="font-heading font-semibold text-soft-white">
-                              {review.userName}
+                              {review.userEmail}
                             </h4>
                           </div>
                           <div className="flex items-center space-x-2 mt-1">
                             <span className="text-sm text-lavender-400 font-body">
-                              {review.date}
+                              {formatDate(review.createdAt)}
                             </span>
                           </div>
                         </div>
                       </div>
                     </div>
                     <p className="text-lavender-300 font-body leading-relaxed">
-                      {review.comment}
+                      {review.content}
                     </p>
                   </div>
                 ))}

@@ -1,5 +1,5 @@
-import { Room } from '../types';
-import { rooms as mockRooms } from '../data/rooms';
+import axios from "axios";
+import { Room } from "../types";
 
 interface GetRoomsParams {
   page: number;
@@ -13,63 +13,67 @@ interface GetRoomsParams {
 
 interface GetRoomsResponse {
   data: Room[];
-  hasMore: boolean;
   total: number;
   page: number;
+  hasMore: boolean;
 }
 
-// Simulate API delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const API_URL = import.meta.env.VITE_API_URL;
 
 class RoomsService {
   async getRooms(params: GetRoomsParams): Promise<GetRoomsResponse> {
-    // Simulate API call delay
-    await delay(800);
+    const { roomType, ...rest } = params;
+    const queryParams = {
+      page: rest.page,
+      limit: rest.limit,
+      checkInDate: rest.checkIn,
+      checkOutDate: rest.checkOut,
+      numberOfGuests: rest.guests,
+      maxPrice: rest.maxPrice,
+      ...(roomType && roomType !== "all" ? { roomType } : {}),
+    };
+    const response = await axios.get(`${API_URL}/booking/get-available-rooms`, {
+      params: queryParams,
+    });
 
-    let filteredRooms = [...mockRooms];
-
-    // Apply filters
-    if (params.roomType && params.roomType !== 'all') {
-      filteredRooms = filteredRooms.filter(room => room.type === params.roomType);
-    }
-
-    if (params.maxPrice) {
-      filteredRooms = filteredRooms.filter(room => room.price <= params.maxPrice);
-    }
-
-    if (params.guests) {
-      filteredRooms = filteredRooms.filter(room => room.maxGuests >= params.guests);
-    }
-
-    // Simulate pagination by duplicating rooms with different IDs
-    const totalRooms = filteredRooms.length * 5; // Simulate more rooms
-    const allRooms: Room[] = [];
-    
-    for (let i = 0; i < 5; i++) {
-      filteredRooms.forEach((room, index) => {
-        allRooms.push({
-          ...room,
-          id: `${room.id}-${i}-${index}`,
-          name: `${room.name} ${i > 0 ? `(${i + 1})` : ''}`
-        });
-      });
-    }
-
-    const startIndex = (params.page - 1) * params.limit;
-    const endIndex = startIndex + params.limit;
-    const paginatedRooms = allRooms.slice(startIndex, endIndex);
-
+    const roomsApi = response.data.result || [];
+    const rooms: Room[] = roomsApi.map((r: any) => ({
+      id: r._id,
+      name: r.name,
+      type: r.roomType as Room["type"],
+      price: r.priceByDay,
+      maxGuests: r.maxPeople,
+      area: r.sizeRoom,          // map về area
+      amenities: r.amenities || [],
+      image: r.image || [],      // giữ array luôn (theo interface của bạn)
+      shortDescription: r.shortDescription || "",
+      fullDescription: r.fullDescription || "",
+    }));
     return {
-      data: paginatedRooms,
-      hasMore: endIndex < totalRooms,
-      total: totalRooms,
-      page: params.page
+      data: rooms,
+      total: rooms.length,
+      page: params.page,
+      hasMore: (params.page * params.limit) < (rooms.length || 0),
     };
   }
 
   async getRoomById(id: string): Promise<Room | null> {
-    await delay(300);
-    return mockRooms.find(room => room.id === id) || null;
+    const response = await axios.get(`${API_URL}/rooms/${id}`);
+    const r = response.data?.result;
+    if (!r) return null;
+
+    return {
+      id: r._id,
+      name: r.name,
+      type: r.roomType as Room["type"],
+      price: r.priceByDay,
+      maxGuests: r.maxPeople,
+      area: r.sizeRoom,          // map về area
+      amenities: r.amenities || [],
+      image: r.image || [],      // giữ array luôn (theo interface của bạn)
+      shortDescription: r.shortDescription || "",
+      fullDescription: r.fullDescription || "",
+    };
   }
 }
 

@@ -1,37 +1,42 @@
 import React, { useState } from "react";
 import { LogIn, ArrowLeft, Eye, EyeOff, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../store/authSlice";
+import type { RootState, AppDispatch } from "../store";
 import { showToast } from "../utils/toast";
 
 export default function Login() {
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { dispatch } = useAuth();
+  const { isLoading, error } = useSelector((state: RootState) => state.auth);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      // For demo purposes, accept any email/password
-      const user = {
-        id: "1",
-        name: formData.email.split("@")[0],
-        email: formData.email,
-      };
+    try {
+      console.log("Login data:", formData);
+      const result = await dispatch(login(formData)).unwrap();
+      console.log("Login result:", result);
 
-      dispatch({ type: "SET_USER", payload: user });
-      showToast.success(`Chào mừng ${user.name}! Đăng nhập thành công`);
-      navigate("/");
-      setIsLoading(false);
-    }, 1000);
+      if (result.data) {
+        const user = result.data;
+        showToast.success(`Chào mừng ${user.email}! Đăng nhập thành công`);
+        navigate("/");
+      } else {
+        throw new Error("Invalid response format");
+      }
+    } catch (error: any) {
+      console.error("Login error:", error);
+      const errorMessage =
+        error.response?.data?.message || error.message || "Đăng nhập thất bại";
+      showToast.error(errorMessage);
+    }
   };
 
   return (

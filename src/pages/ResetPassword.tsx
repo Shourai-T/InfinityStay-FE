@@ -2,6 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Lock, ArrowLeft, Eye, EyeOff, CheckCircle } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { showToast } from "../utils/toast";
+import { resetPassword } from "../store/authSlice";
+import {
+  AsyncThunkAction,
+  ThunkDispatch,
+  UnknownAction,
+} from "@reduxjs/toolkit";
+import { ResetPasswordPayload } from "../types";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../store";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -14,16 +23,17 @@ export default function ResetPassword() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const dispatch = useDispatch<AppDispatch>();
 
   const email = location.state?.email;
-  const otpVerified = location.state?.otpVerified;
+  const resetToken = location.state?.resetToken;
 
   useEffect(() => {
-    if (!email || !otpVerified) {
+    if (!email || !resetToken) {
       navigate("/forgot-password");
       return;
     }
-  }, [email, otpVerified, navigate]);
+  }, [email, resetToken, navigate]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -49,14 +59,23 @@ export default function ResetPassword() {
 
     if (!validateForm()) return;
 
-    setIsLoading(true);
+    try {
+      setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+      await dispatch(
+        resetPassword({
+          email: email,
+          resetToken: resetToken,
+          newPassword: formData.newPassword,
+        })
+      ).unwrap();
       showToast.success("Đặt lại mật khẩu thành công!");
       navigate("/dang-nhap");
+    } catch (err: any) {
+      showToast.error(err.response?.data?.message || "Có lỗi xảy ra");
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -229,4 +248,22 @@ export default function ResetPassword() {
       </div>
     </div>
   );
+}
+function dispatch(
+  arg0: AsyncThunkAction<
+    any,
+    ResetPasswordPayload,
+    {
+      state?: unknown;
+      dispatch?: ThunkDispatch<unknown, unknown, UnknownAction>;
+      extra?: unknown;
+      rejectValue?: unknown;
+      serializedErrorType?: unknown;
+      pendingMeta?: unknown;
+      fulfilledMeta?: unknown;
+      rejectedMeta?: unknown;
+    }
+  >
+) {
+  throw new Error("Function not implemented.");
 }
