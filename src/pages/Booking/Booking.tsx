@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft,
   Calendar,
@@ -10,39 +10,87 @@ import {
   MessageSquare,
   ChevronDownIcon,
 } from "lucide-react";
-import * as Icons from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import { useBooking } from "../contexts/BookingContext";
-import { showToast } from "../utils/toast";
+import { showToast } from "../../utils/toast";
 import {
   formatCurrency,
   calculateNights,
   formatDate,
   generateBookingId,
-} from "../utils/dateUtils";
+} from "../../utils/dateUtils";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../store";
-import { addBooking } from "../store/bookingSlice";
+import { RootState, AppDispatch } from "../../store";
+import { getUser } from "../../store/authSlice";
+import { createBooking, addBooking } from "../../store/bookingSlice";
+import PaymentContent from "./PaymentContent";
+import {
+  connectPaymentSocket,
+  disconnectPaymentSocket,
+} from "../../services/paymentSocket";
 
 export default function Booking() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
+  const cleanupSocketRef = useRef<(() => void) | null>(null);
 
   const { selectedRoom, dateRange, guests } = useSelector(
     (state: RootState) => state.booking
   );
-  const { user } = useSelector((state: RootState) => state.auth);
-
+  const { user, isLoading: authLoading } = useSelector(
+    (state: RootState) => state.auth
+  );
+  const username = `${user?.lastName} ${user?.firstName}`.trim();
   const [bookingData, setBookingData] = useState({
-    guestName: user?.name || "",
+    guestName: username || "",
     guestEmail: user?.email || "",
-    guestPhone: user?.phone || "",
+    guestPhone: user?.phoneNumber || "",
     guests: guests || 1,
     specialRequests: "",
     paymentMethod: "online" as "online" | "onsite",
   });
+
+  useEffect(() => {
+    if (user) {
+      setBookingData((prev) => ({
+        ...prev,
+        guestName: username,
+        guestEmail: user.email || "",
+        guestPhone: user.phoneNumber || "",
+      }));
+    }
+  }, [user]);
+
   const [isLoading, setIsLoading] = useState(false);
+
+  // State hiển thị PaymentContent
+  const [showPayment, setShowPayment] = useState(false);
+  const [isGeneratingQR, setIsGeneratingQR] = useState(false);
+  const [paymentUrl, setPaymentUrl] = useState("");
+  const [paymentStatus, setPaymentStatus] = useState<
+    "pending" | "checking" | "success" | "failed"
+  >("pending");
+
+  // Lấy thông tin user khi component mount - chỉ gọi khi cần thiết
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    // Chỉ gọi getUser khi:
+    // 1. Có token
+    // 2. Không có user hoặc user thiếu thông tin quan trọng
+    // 3. Không đang loading
+    if (token && (!user || !user.firstName || !user.lastName) && !authLoading) {
+      dispatch(getUser());
+    }
+  }, [dispatch, user?.firstName, user?.lastName, authLoading]);
+
+  // Disconnect WebSocket when component unmounts
+  useEffect(() => {
+    return () => {
+      if (cleanupSocketRef.current) {
+        cleanupSocketRef.current();
+      }
+    };
+  }, []);
 
   if (!selectedRoom || !dateRange) {
     return (
@@ -64,21 +112,49 @@ export default function Booking() {
 
   const nights = calculateNights(dateRange.checkIn, dateRange.checkOut);
   const totalPrice = selectedRoom.price * nights;
+  // State for copy payment code feedback
+  const [copied, setCopied] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!user) {
-      showToast.loginRequired();
-      navigate("/dang-nhap");
-      return;
+  // Các hàm PaymentContent
+  const copyPaymentCode = () => {
+    if (paymentUrl) {
+      navigator.clipboard.writeText(paymentUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
+  };
 
-    setIsLoading(true);
-
+  const checkPaymentStatus = () => {
+    setPaymentStatus("checking");
     setTimeout(() => {
+      const success = Math.random() > 0.5;
+      setPaymentStatus(success ? "success" : "failed");
+      if (success) {
+        showToast.bookingSuccess(""); // Pass the booking ID if available
+        navigate("/xac-nhan");
+      }
+    }, 2000);
+  };
+
+  const onPaymentSuccess = async () => {
+    try {
+      // Tạo booking qua API
+      const bookingPayload = {
+        roomId: selectedRoom.id,
+        checkInDate: dateRange.checkIn,
+        checkOutDate: dateRange.checkOut,
+        numberOfGuests: bookingData.guests,
+        typeBooking: "daily",
+        note: bookingData.specialRequests,
+      };
+
+      const apiResponse = await dispatch(
+        createBooking(bookingPayload)
+      ).unwrap();
+
+      // Tạo booking local để hiển thị
       const booking = {
-        id: generateBookingId(),
+        id: apiResponse.result.bookingId,
         roomId: selectedRoom.id,
         roomName: selectedRoom.name,
         checkIn: dateRange.checkIn,
@@ -94,13 +170,66 @@ export default function Booking() {
         createdAt: new Date().toISOString(),
       };
 
-      // Lưu booking vào redux
       dispatch(addBooking(booking));
 
-      showToast.bookingSuccess(booking.id);
-      navigate("/xac-nhan");
-      setIsLoading(false);
-    }, 2000);
+      // If payment method is online, connect to WebSocket to get payment URL
+      if (bookingData.paymentMethod === "online") {
+        // Connect to socket and store cleanup function
+        const cleanup = connectPaymentSocket(bookingData.guestEmail, (url) => {
+          setPaymentUrl(url);
+          setIsGeneratingQR(false);
+        });
+
+        cleanupSocketRef.current = cleanup;
+
+        // Set a timeout for WebSocket connection as fallback
+        const timeoutId = setTimeout(() => {
+          if (!paymentUrl) {
+            // If we haven't received a payment URL after 15 seconds, show fallback UI
+            setIsGeneratingQR(false);
+            showToast.warning(
+              "Không thể kết nối với máy chủ thanh toán. Vui lòng liên hệ hỗ trợ."
+            );
+          }
+        }, 15000);
+
+        return () => {
+          clearTimeout(timeoutId);
+          if (cleanupSocketRef.current) {
+            cleanupSocketRef.current();
+          }
+        };
+      } else {
+        showToast.bookingSuccess(booking.id);
+        navigate("/xac-nhan");
+      }
+    } catch (error: any) {
+      showToast.error(error.message || "Tạo booking thất bại");
+    }
+  };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!user) {
+      showToast.loginRequired();
+      navigate("/dang-nhap");
+      return;
+    }
+
+    // Nếu là thanh toán tại khách sạn => xử lý luôn
+    if (bookingData.paymentMethod === "onsite") {
+      setIsLoading(true);
+      setTimeout(onPaymentSuccess, 1500);
+      return;
+    }
+
+    // Nếu online => hiển thị PaymentContent và bắt đầu tạo booking
+    setIsLoading(true);
+    setShowPayment(true);
+    setIsGeneratingQR(true);
+
+    // Gọi API booking ngay khi chọn thanh toán online
+    onPaymentSuccess();
   };
 
   const handlePaymentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,7 +252,7 @@ export default function Booking() {
             Quay lại
           </button>
           <div>
-            <h1 className="text-4xl font-display font-bold text-gradient">
+            <h1 className="text-4xl pb-1 font-display font-bold text-gradient">
               Đặt phòng
             </h1>
             <p className="text-lavender-300 font-body mt-2">
@@ -339,7 +468,7 @@ export default function Booking() {
               {/* Room Image */}
               <div className="mb-6">
                 <img
-                  src={selectedRoom.images[0]}
+                  src={selectedRoom.image[0]}
                   alt={selectedRoom.name}
                   className="w-full h-40 object-cover rounded-xl"
                 />
@@ -420,6 +549,17 @@ export default function Booking() {
             </div>
           </div>
         </div>
+        {!showPayment ? (
+          ""
+        ) : (
+          <PaymentContent
+            paymentMethod={bookingData.paymentMethod}
+            isGeneratingQR={isGeneratingQR}
+            paymentUrl={paymentUrl}
+            paymentStatus={paymentStatus}
+            checkPaymentStatus={checkPaymentStatus}
+          />
+        )}
       </div>
     </div>
   );

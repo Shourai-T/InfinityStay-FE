@@ -10,12 +10,17 @@ import {
   X,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
+// Thay thế useAuth bằng useSelector từ redux
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "../../store/authSlice";
+import { RootState } from "../../store";
 
 export const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { state, dispatch } = useAuth();
+  // Lấy user từ redux store
+  const user = useSelector((state: RootState) => state.auth.user);
+  const dispatch = useDispatch();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleNavigation = (path: string) => {
@@ -24,7 +29,7 @@ export const Header: React.FC = () => {
   };
 
   const handleLogout = () => {
-    dispatch({ type: "SET_USER", payload: null });
+    dispatch(logout());
     navigate("/");
     setIsMobileMenuOpen(false);
   };
@@ -92,7 +97,7 @@ export const Header: React.FC = () => {
 
           {/* Desktop User Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            {state.user ? (
+            {user ? (
               <div className="flex items-center space-x-4">
                 <button
                   onClick={() => handleNavigation("/dat-phong-cua-toi")}
@@ -103,14 +108,18 @@ export const Header: React.FC = () => {
                     Đặt phòng của tôi
                   </span>
                 </button>
-                <div className="flex items-center space-x-3 px-4 py-2 glass-effect rounded-xl">
+                <button
+                  onClick={() => handleNavigation("/ho-so")}
+                  className="flex items-center space-x-3 px-4 py-2 glass-effect rounded-xl hover:bg-royal-500/10 transition-colors duration-300"
+                >
                   <div className="w-8 h-8 bg-gradient-royal rounded-full flex items-center justify-center">
                     <User className="h-4 w-4 text-white" />
                   </div>
                   <span className="text-sm font-heading font-medium text-soft-white">
-                    {state.user.name}
+                    {/* Hiển thị tên user */}
+                    {user.email}
                   </span>
-                </div>
+                </button>
                 <button
                   onClick={handleLogout}
                   className="text-sm text-lavender-400 hover:text-lavender-300 transition-colors duration-300 font-body"
@@ -192,7 +201,7 @@ export const Header: React.FC = () => {
               </button>
 
               {/* User Section */}
-              {state.user ? (
+              {user ? (
                 <div className="border-t border-royal-500/20 pt-4 space-y-4">
                   {/* User Info */}
                   <div className="flex items-center space-x-3 px-4 py-2 glass-effect rounded-xl">
@@ -200,7 +209,7 @@ export const Header: React.FC = () => {
                       <User className="h-4 w-4 text-white" />
                     </div>
                     <span className="text-sm font-heading font-medium text-soft-white">
-                      {state.user.name}
+                      {user.firstName} {user.lastName}
                     </span>
                   </div>
 

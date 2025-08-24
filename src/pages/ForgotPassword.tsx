@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Mail, ArrowLeft, Send, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { showToast } from "../utils/toast";
+import { authService } from "../services/authService";
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
@@ -23,12 +24,21 @@ export default function ForgotPassword() {
 
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Gọi đúng API forgotPassword
+      await authService.forgotPassword(email);
       showToast.success("Mã OTP đã được gửi đến email của bạn");
-      navigate("/verify-otp", { state: { email, type: "forgot-password" } });
+      navigate("/verify-otp", {
+        state: {
+          email,
+          type: "forgot-password",
+        },
+      });
+    } catch (error: any) {
+      showToast.error(error.message || "Gửi mã OTP thất bại");
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (

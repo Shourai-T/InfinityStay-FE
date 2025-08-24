@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Outlet } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import Layout from "./components/layout/Layout";
 import LoadingSpinner from "./components/ui/LoadingSpinner";
@@ -12,35 +12,57 @@ const Register = lazy(() => import("./pages/Register"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const VerifyOTP = lazy(() => import("./pages/VerifyOTP"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const Booking = lazy(() => import("./pages/Booking"));
+const Booking = lazy(() => import("./pages/Booking/Booking"));
 const Confirmation = lazy(() => import("./pages/Confirmation"));
 const MyBookings = lazy(() => import("./pages/MyBookings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AboutUs = lazy(() => import("./pages/AboutUs/AboutUs"));
 const RoomDetail = lazy(() => import("./pages/RoomDetail"));
+const Profile = lazy(() => import("./pages/Profile"));
+
+// Admin Page
+const AdminDashboard = lazy(() => import("./Admin/components/AdminDashboard"));
 
 function App() {
   return (
     <AuthProvider>
-      <Layout>
-        <Suspense fallback={<LoadingSpinner />}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/phong" element={<Rooms />} />
-            <Route path="/phong/:slug" element={<RoomDetail />} />
-            <Route path="/about-us" element={<AboutUs />} />
-            <Route path="/dang-nhap" element={<Login />} />
-            <Route path="/dang-ky" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/verify-otp" element={<VerifyOTP />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/dat-phong" element={<Booking />} />
-            <Route path="/xac-nhan" element={<Confirmation />} />
-            <Route path="/dat-phong-cua-toi" element={<MyBookings />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
-      </Layout>
+      <Routes>
+        {/* Admin routes - rendered outside of Layout */}
+        <Route
+          path="/admin/*"
+          element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <AdminDashboard />
+            </Suspense>
+          }
+        />
+
+        {/* User routes - rendered inside Layout with header */}
+        <Route
+          element={
+            <Layout>
+              <Suspense fallback={<LoadingSpinner />}>
+                <Outlet />
+              </Suspense>
+            </Layout>
+          }
+        >
+          <Route path="/" element={<Home />} />
+          <Route path="/phong" element={<Rooms />} />
+          <Route path="/phong/:slug" element={<RoomDetail />} />
+          <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/dang-nhap" element={<Login />} />
+          <Route path="/dang-ky" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/verify-otp" element={<VerifyOTP />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/dat-phong" element={<Booking />} />
+          <Route path="/xac-nhan" element={<Confirmation />} />
+          <Route path="/dat-phong-cua-toi" element={<MyBookings />} />
+          <Route path="/ho-so" element={<Profile />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+      </Routes>
     </AuthProvider>
   );
 }

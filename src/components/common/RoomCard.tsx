@@ -22,7 +22,7 @@ export const RoomCard = forwardRef<HTMLDivElement, RoomCardProps>(
           {/* Image Section */}
           <div className="relative md:w-2/5 h-64 md:h-auto">
             <img
-              src={room.images[0]}
+              src={room.image[0]}
               alt={room.name}
               className="w-full h-full object-cover transition-transform duration-500"
               loading="lazy"

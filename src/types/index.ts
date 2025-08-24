@@ -6,23 +6,23 @@ export interface Room {
   maxGuests: number;
   area: number;
   amenities: string[];
-  images: string[];
+  image: string[];
   shortDescription: string;
   fullDescription: string;
-  features: {
-    icon: string;
-    title: string;
-    description: string;
-  }[];
-  reviews: {
-    id: string;
-    userName: string;
-    userAvatar?: string;
-    comment: string;
-    date: string;
-  }[];
-  totalReviews: number;
-  available: boolean;
+  // features: {
+  //   icon: string;
+  //   title: string;
+  //   description: string;
+  // }[];
+  // reviews: {
+  //   id: string;
+  //   userName: string;
+  //   userAvatar?: string;
+  //   comment: string;
+  //   date: string;
+  // }[];
+  // totalReviews: number;
+  // available: boolean;
 }
 
 export type RoomType = Room['type'] | 'all';
@@ -39,16 +39,17 @@ export interface Booking {
   guestPhone: string;
   specialRequests?: string;
   totalPrice: number;
-  status: 'pending' | 'confirmed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'canceled';
   paymentMethod: 'online' | 'onsite';
   createdAt: string;
 }
 
 export interface User {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  phone?: string;
+  phoneNumber: string;
 }
 
 export interface DateRange {
@@ -62,4 +63,26 @@ export interface Filters {
   guests: number;
   maxPrice: number;
   roomType: RoomType;
+}
+
+export interface AuthState {
+  user: User | null;
+  token: string | null;
+  isLoading: boolean;
+  error: string | null;
+}
+
+export interface ResetPasswordPayload {
+  email: string;
+  resetToken: string;
+  newPassword: string;
+}
+
+export interface RegisterPayload {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  password: string;
+  confirmPassword: string;
 }

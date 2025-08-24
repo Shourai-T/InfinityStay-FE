@@ -14,7 +14,8 @@ export const ToastProvider: React.FC = () => {
       pauseOnFocusLoss
       draggable
       pauseOnHover
-      theme="dark"
+      closeButton={false}
+      // theme="dark"
       toastClassName="toast-container"
       // bodyClassName="toast-body"
       progressClassName="toast-progress"
