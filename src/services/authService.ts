@@ -30,7 +30,6 @@ export const authService = {
   register: async (data: RegisterData) => {
     try {
       const response = await axios.post(`${API_URL}/auth/register`, data);
-      console.log('Register API response:', response.data);
       return {
         success: true,
         data: response.data,
@@ -52,7 +51,6 @@ export const authService = {
   }) => {
     try {
       const response = await axios.post(`${API_URL}/auth/verify-otp`, data);
-      console.log('Verify OTP response:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('Verify OTP error:', {
@@ -66,7 +64,6 @@ export const authService = {
   verifyForgotPasswordOtp: async (data: { email: string; otp: string }) => {
     try {
       const response = await axios.post(`${API_URL}/auth/verify-otp-forgot-password`, data);
-      console.log("Verify Forgot Password OTP response:", response.data);
       return response.data;
     } catch (error: any) {
       console.error("Verify Forgot Password OTP error:", {
@@ -82,6 +79,7 @@ export const authService = {
     type: string;
   }) => {
     try {
+
       const response = await axios.post(`${API_URL}/auth/resend-otp`, data);
       return response.data;
     } catch (error: any) {
@@ -94,12 +92,12 @@ export const authService = {
 
   login: async (credentials: { email: string; password: string }) => {
     try {
+      console.log('Login API - sending credentials:', API_URL, credentials);
       const response = await axios.post<LoginResponse>(`${API_URL}/auth/login`, credentials, {
-      withCredentials: true,
-    });
-      console.log('Login API response:', response.data);
-      
-      // Format lại response để phù hợp với state
+        withCredentials: true,
+      });
+
+
       return {
         statusCode: response.data.statusCode,
         message: response.data.message,
@@ -107,7 +105,6 @@ export const authService = {
         token: response.data.result.access_token
       };
     } catch (error: any) {
-      console.error('Login error response:', error.response?.data);
       throw error.response?.data || error;
     }
   },
@@ -128,7 +125,7 @@ export const authService = {
     } catch (error: any) {
       console.error('Reset password error:', error.response?.data);
       throw error.response?.data || error;
-    } 
+    }
   },
 
   forgotPassword: async (email: string) => {
@@ -155,7 +152,6 @@ export const authService = {
         }
       });
 
-      console.log("Get Profile API response:", response.data);
 
       return {
         success: true,
@@ -188,7 +184,6 @@ export const authService = {
         },
       });
 
-      console.log('Update Profile API response:', response.data);
 
       return {
         success: true,
@@ -199,11 +194,11 @@ export const authService = {
         status: error.response?.status,
         data: error.response?.data,
       });
-      
-      const errorMessage = error.response?.data?.message || 
-        error.response?.data?.error || 
+
+      const errorMessage = error.response?.data?.message ||
+        error.response?.data?.error ||
         'Không thể cập nhật thông tin cá nhân';
-      
+
       throw new Error(errorMessage);
     }
   },
@@ -222,11 +217,6 @@ axios.interceptors.request.use(
       config.headers['Authorization'] = `Bearer ${token}`;
     }
 
-    console.log('Request:', {
-      url: config.url,
-      method: config.method,
-      data: config.data,
-    });
 
     return config;
   },
@@ -235,11 +225,7 @@ axios.interceptors.request.use(
 
 axios.interceptors.response.use(
   (response) => {
-    console.log('Response:', {
-      url: response.config.url,
-      status: response.status,
-      data: response.data,
-    });
+
     return response;
   },
   async (error) => {
@@ -251,7 +237,7 @@ axios.interceptors.response.use(
     ) {
       originalRequest._retry = true;
       try {
-        const res = await authService.refresh(); 
+        const res = await authService.refresh();
         // API refresh trả về { access_token }
 
         const newToken = res.access_token;
