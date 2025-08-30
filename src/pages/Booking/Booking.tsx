@@ -70,19 +70,6 @@ export default function Booking() {
     "pending" | "checking" | "success" | "failed"
   >("pending");
 
-  // Lấy thông tin user khi component mount - chỉ gọi khi cần thiết
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    // Chỉ gọi getUser khi:
-    // 1. Có token
-    // 2. Không có user hoặc user thiếu thông tin quan trọng
-    // 3. Không đang loading
-    if (token && (!user || !user.firstName || !user.lastName) && !authLoading) {
-      dispatch(getUser());
-    }
-  }, [dispatch, user?.firstName, user?.lastName, authLoading]);
-
   // Disconnect WebSocket when component unmounts
   useEffect(() => {
     return () => {
@@ -289,6 +276,7 @@ export default function Booking() {
                       }
                       className="form-input w-full px-4 py-4 rounded-xl font-body"
                       placeholder="Nhập họ và tên"
+                      disabled
                     />
                   </div>
 
@@ -310,6 +298,7 @@ export default function Booking() {
                         }
                         className="form-input w-full pl-12 pr-4 py-4 rounded-xl font-body"
                         placeholder="Nhập email"
+                        disabled
                       />
                     </div>
                   </div>
@@ -332,6 +321,7 @@ export default function Booking() {
                         }
                         className="form-input w-full pl-12 pr-4 py-4 rounded-xl font-body"
                         placeholder="Nhập số điện thoại"
+                        disabled
                       />
                     </div>
                   </div>
