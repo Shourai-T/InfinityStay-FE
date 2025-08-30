@@ -1,20 +1,24 @@
 import React, { useState } from "react";
 import { LogIn, ArrowLeft, Eye, EyeOff, Sparkles } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../store/authSlice";
 import type { RootState, AppDispatch } from "../store";
 import { showToast } from "../utils/toast";
 
-export default function Login() {
+const Login = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isLoading, error } = useSelector((state: RootState) => state.auth);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+
+  // Lấy URL redirect từ state (nếu có)
+  const from = location.state?.from || "/";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,8 +30,17 @@ export default function Login() {
 
       if (result.data) {
         const user = result.data;
-        showToast.success(`Chào mừng ${user.email}! Đăng nhập thành công`);
-        navigate("/");
+        showToast.success(
+          `Chào mừng ${user.firstName || user.email}! Đăng nhập thành công`
+        );
+
+        // Điều hướng dựa trên role và URL trước đó
+        if (user.role === "admin") {
+          navigate("/admin/dashboard");
+        } else {
+          // Nếu người dùng từng muốn truy cập vào trang admin, không cho phép
+          navigate(from.startsWith("/admin") ? "/" : from);
+        }
       } else {
         throw new Error("Invalid response format");
       }
@@ -167,4 +180,6 @@ export default function Login() {
       </div>
     </div>
   );
-}
+};
+
+export default Login;

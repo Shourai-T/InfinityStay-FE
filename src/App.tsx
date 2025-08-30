@@ -3,6 +3,10 @@ import { Suspense, lazy } from "react";
 import Layout from "./components/layout/Layout";
 import LoadingSpinner from "./components/ui/LoadingSpinner";
 import { AuthProvider } from "./contexts/AuthContext";
+import AdminRoute from "./components/AdminRoute";
+import UserRoute from "./components/UserRoute";
+import PublicRoute from "./components/PublicRoute";
+import ChatPopup from "./pages/ChatPopup";
 
 // Lazy load pages for better performance
 const Home = lazy(() => import("./pages/Home"));
@@ -27,13 +31,15 @@ function App() {
   return (
     <AuthProvider>
       <Routes>
-        {/* Admin routes - rendered outside of Layout */}
+        {/* Admin routes - Chỉ admin mới truy cập được */}
         <Route
           path="/admin/*"
           element={
-            <Suspense fallback={<LoadingSpinner />}>
-              <AdminDashboard />
-            </Suspense>
+            <AdminRoute>
+              <Suspense fallback={<LoadingSpinner />}>
+                <AdminDashboard />
+              </Suspense>
+            </AdminRoute>
           }
         />
 
@@ -47,22 +53,106 @@ function App() {
             </Layout>
           }
         >
+          {/* Trang không cần protected */}
           <Route path="/" element={<Home />} />
-          <Route path="/phong" element={<Rooms />} />
-          <Route path="/phong/:slug" element={<RoomDetail />} />
           <Route path="/about-us" element={<AboutUs />} />
-          <Route path="/dang-nhap" element={<Login />} />
-          <Route path="/dang-ky" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/verify-otp" element={<VerifyOTP />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/dat-phong" element={<Booking />} />
-          <Route path="/xac-nhan" element={<Confirmation />} />
-          <Route path="/dat-phong-cua-toi" element={<MyBookings />} />
-          <Route path="/ho-so" element={<Profile />} />
+
+          {/* Trang chỉ dành cho user, admin không thể truy cập */}
+          <Route
+            path="/phong"
+            element={
+              <PublicRoute>
+                <Rooms />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/phong/:slug"
+            element={
+              <UserRoute>
+                <RoomDetail />
+              </UserRoute>
+            }
+          />
+          <Route
+            path="/verify-otp"
+            element={
+              <PublicRoute>
+                <VerifyOTP />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/dat-phong"
+            element={
+              <UserRoute>
+                <Booking />
+              </UserRoute>
+            }
+          />
+          <Route
+            path="/xac-nhan"
+            element={
+              <UserRoute>
+                <Confirmation />
+              </UserRoute>
+            }
+          />
+          <Route
+            path="/dat-phong-cua-toi"
+            element={
+              <UserRoute>
+                <MyBookings />
+              </UserRoute>
+            }
+          />
+          <Route
+            path="/ho-so"
+            element={
+              <UserRoute>
+                <Profile />
+              </UserRoute>
+            }
+          />
+
+          {/* Trang chỉ dành cho người chưa đăng nhập */}
+          <Route
+            path="/dang-nhap"
+            element={
+              <PublicRoute restricted>
+                <Login />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/dang-ky"
+            element={
+              <PublicRoute restricted>
+                <Register />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              <PublicRoute restricted>
+                <ForgotPassword />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/reset-password"
+            element={
+              <PublicRoute>
+                <ResetPassword />
+              </PublicRoute>
+            }
+          />
+
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
+      <ChatPopup />
     </AuthProvider>
   );
 }
