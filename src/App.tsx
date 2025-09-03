@@ -23,7 +23,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const AboutUs = lazy(() => import("./pages/AboutUs/AboutUs"));
 const RoomDetail = lazy(() => import("./pages/RoomDetail"));
 const Profile = lazy(() => import("./pages/Profile"));
-
+const PaymentFailed = lazy(() => import("./pages/Booking/PaymentFailed"));
 // Admin Page
 const AdminDashboard = lazy(() => import("./Admin/components/AdminDashboard"));
 
@@ -111,6 +111,14 @@ function App() {
             element={
               <UserRoute>
                 <Profile />
+              </UserRoute>
+            }
+          />
+          <Route
+            path="/thanh-toan-that-bai"
+            element={
+              <UserRoute>
+                <PaymentFailed />
               </UserRoute>
             }
           />

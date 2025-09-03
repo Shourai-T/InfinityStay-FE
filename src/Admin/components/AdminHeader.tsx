@@ -9,10 +9,7 @@ interface AdminHeaderProps {
   setSidebarOpen: (open: boolean) => void;
 }
 
-const AdminHeader: React.FC<AdminHeaderProps> = ({
-  sidebarOpen,
-  setSidebarOpen,
-}) => {
+const AdminHeader: React.FC<AdminHeaderProps> = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();

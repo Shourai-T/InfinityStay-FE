@@ -427,7 +427,7 @@ export default function MyBookings() {
                                 Điện thoại:
                               </span>
                               <span className="ml-2 text-soft-white">
-                                {booking.guestPhone}
+                                {booking.phoneNumber}
                               </span>
                             </div>
                           </div>
@@ -453,7 +453,7 @@ export default function MyBookings() {
                                 Ngày đặt:
                               </span>
                               <span className="ml-2 text-soft-white">
-                                {formatDate(booking.create)}
+                                {formatDate(booking.createAt)}
                               </span>
                             </div>
                             {booking.specialRequests && (

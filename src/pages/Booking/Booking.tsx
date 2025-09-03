@@ -119,6 +119,8 @@ export default function Booking() {
       if (success) {
         showToast.bookingSuccess(""); // Pass the booking ID if available
         navigate("/xac-nhan");
+      } else {
+        navigate("/thanh-toan-that-bai");
       }
     }, 2000);
   };
@@ -133,6 +135,7 @@ export default function Booking() {
         numberOfGuests: bookingData.guests,
         typeBooking: "daily",
         note: bookingData.specialRequests,
+        phoneNumber: bookingData.guestPhone,
       };
 
       const apiResponse = await dispatch(
@@ -224,6 +227,7 @@ export default function Booking() {
       ...prev,
       paymentMethod: e.target.value as "online" | "onsite",
     }));
+    setIsLoading(false); // Reset loading khi đổi hình thức thanh toán
   };
 
   return (
@@ -274,7 +278,7 @@ export default function Booking() {
                           guestName: e.target.value,
                         })
                       }
-                      className="form-input w-full px-4 py-4 rounded-xl font-body"
+                      className="form-input w-full px-4 py-4 rounded-xl font-body opacity-50 bg-midnight-700 cursor-not-allowed"
                       placeholder="Nhập họ và tên"
                       disabled
                     />
@@ -296,7 +300,7 @@ export default function Booking() {
                             guestEmail: e.target.value,
                           })
                         }
-                        className="form-input w-full pl-12 pr-4 py-4 rounded-xl font-body"
+                        className="form-input w-full pl-12 pr-4 py-4 rounded-xl font-body opacity-50 bg-midnight-700 cursor-not-allowed"
                         placeholder="Nhập email"
                         disabled
                       />
@@ -321,7 +325,6 @@ export default function Booking() {
                         }
                         className="form-input w-full pl-12 pr-4 py-4 rounded-xl font-body"
                         placeholder="Nhập số điện thoại"
-                        disabled
                       />
                     </div>
                   </div>

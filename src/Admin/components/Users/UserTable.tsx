@@ -36,9 +36,9 @@ const UserTable: React.FC<UserTableProps> = ({
             <th className="text-left py-4 px-4 font-heading font-semibold text-lavender-300">
               Tổng chi tiêu
             </th>
-            <th className="text-left py-4 px-4 font-heading font-semibold text-lavender-300">
+            {/* <th className="text-left py-4 px-4 font-heading font-semibold text-lavender-300">
               Thao tác
-            </th>
+            </th> */}
           </tr>
         </thead>
         <tbody>
@@ -96,7 +96,7 @@ const UserTable: React.FC<UserTableProps> = ({
               <td className="py-4 px-4 font-body text-infinity-400 font-semibold">
                 {formatCurrency(user.totalSpent)}
               </td>
-              <td className="py-4 px-4">
+              {/* <td className="py-4 px-4">
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => onEdit(user)}
@@ -111,7 +111,7 @@ const UserTable: React.FC<UserTableProps> = ({
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
-              </td>
+              </td> */}
             </tr>
           ))}
         </tbody>
