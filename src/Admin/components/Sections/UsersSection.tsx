@@ -186,14 +186,14 @@ const UsersSection: React.FC<UsersSectionProps> = ({
             <span>Làm mới</span>
           </button>
 
-          <button
+          {/* <button
             onClick={() => setShowUserModal(true)}
             disabled={loading}
             className="btn-gold px-6 py-3 rounded-xl font-heading font-semibold flex items-center space-x-2"
           >
             <Plus className="h-5 w-5" />
             <span>Thêm user</span>
-          </button>
+          </button> */}
         </div>
       </div>
 

@@ -23,6 +23,10 @@ const RoomModal: React.FC<RoomModalProps> = ({
 }) => {
   const [newAmenity, setNewAmenity] = useState("");
   const [imageFiles, setImageFiles] = useState<File[]>([]);
+  // Thêm state cho giá hiển thị
+  const [priceDisplay, setPriceDisplay] = useState(
+    roomForm.price ? roomForm.price.toLocaleString("en-US") : ""
+  );
 
   const commonAmenities = [
     "WiFi miễn phí",
@@ -154,13 +158,17 @@ const RoomModal: React.FC<RoomModalProps> = ({
                 Giá (VNĐ/đêm) <span className="text-red-400">*</span>
               </label>
               <input
-                type="number"
-                value={roomForm.price === 0 ? "" : roomForm.price}
+                type="text"
+                value={priceDisplay}
                 onChange={(e) => {
-                  const inputValue = e.target.value;
+                  // Xóa ký tự không phải số
+                  const raw = e.target.value.replace(/[^\d]/g, "");
+                  setPriceDisplay(
+                    raw ? Number(raw).toLocaleString("en-US") : ""
+                  );
                   setRoomForm({
                     ...roomForm,
-                    price: inputValue === "" ? 0 : Number(inputValue),
+                    price: raw === "" ? 0 : Number(raw),
                   });
                 }}
                 className="form-input w-full px-4 py-3 rounded-xl font-body [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
