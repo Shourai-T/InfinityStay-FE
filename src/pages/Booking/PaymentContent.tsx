@@ -80,9 +80,15 @@ const PaymentContent: React.FC<PaymentContentProps> = ({
           </div>
         ) : (
           <div className="bg-royal-500/10 rounded-lg p-8 w-full text-center">
-            <p className="text-red-400">
+            <p className="text-red-400 mb-4">
               Không thể tạo liên kết thanh toán. Vui lòng thử lại sau.
             </p>
+            <button
+              onClick={checkPaymentStatus}
+              className="btn-gold px-8 py-3 rounded-xl font-heading font-semibold"
+            >
+              Thử lại
+            </button>
           </div>
         )}
       </div>
@@ -144,13 +150,19 @@ const PaymentContent: React.FC<PaymentContentProps> = ({
           </div>
         )}
 
-        {paymentStatus === "failed" && (
+        {/* {paymentStatus === "failed" && (
           <div className="text-red-400 font-body">
             <X className="h-8 w-8 mx-auto mb-2" />
             <p className="font-semibold">Thanh toán thất bại</p>
-            <p className="text-sm">Vui lòng thử lại</p>
+            <p className="text-sm mb-4">Vui lòng thử lại</p>
+            <button
+              onClick={checkPaymentStatus}
+              className="btn-gold px-8 py-3 rounded-xl font-heading font-semibold"
+            >
+              Kiểm tra thanh toán
+            </button>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

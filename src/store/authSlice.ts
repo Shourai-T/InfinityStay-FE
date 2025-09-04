@@ -2,21 +2,6 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { authService } from "../services/authService";
 import { AuthState, RegisterPayload, ResetPasswordPayload } from "../types";
 
-// interface User {
-//   id: string;
-//   firstName: string;
-//   lastName: string;
-//   email: string;
-//   phoneNumber: string;
-// }
-
-// interface AuthState {
-//   user: User | null;
-//   token: string | null;
-//   refreshToken: string | null;
-//   isLoading: boolean;
-//   error: string | null;
-// }
 
 const initialState: AuthState = {
   user: (() => {
@@ -31,16 +16,8 @@ const initialState: AuthState = {
   token: localStorage.getItem('token'),
   isLoading: false,
   error: null,
+  role: localStorage.getItem('role') || 'user', // Mặc định là 'user'
 };
-
-// interface RegisterPayload {
-//   firstName: string;
-//   lastName: string;
-//   email: string;
-//   phoneNumber: string;
-//   password: string;
-//   confirmPassword: string;
-// }
 
 export const register = createAsyncThunk(
   "auth/register",
@@ -177,8 +154,10 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       state.error = null;
+      state.role = 'user'; // Reset role về mặc định
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      localStorage.removeItem('role');
       state.isLoading = false;
     },
     clearError: (state) => {
@@ -199,7 +178,8 @@ const authSlice = createSlice({
           firstName: action.payload.data.firstName,
           lastName: action.payload.data.lastName,
           email: action.payload.data.email,
-          phoneNumber: action.payload.data.phoneNumber
+          phoneNumber: action.payload.data.phoneNumber,
+          role: action.payload.data.role || 'user'
         };
         localStorage.setItem('user', JSON.stringify(state.user));
         if (action.payload.data && action.payload.data.token) {
@@ -250,7 +230,9 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload.data;
+        state.role = action.payload.data.role || 'user';
         localStorage.setItem('user', JSON.stringify(action.payload.data));
+        localStorage.setItem('role', action.payload.data.role || 'user');
         if (action.payload.token) {
           state.token = action.payload.token;
           localStorage.setItem('token', action.payload.token);

@@ -50,6 +50,7 @@ export interface User {
   lastName: string;
   email: string;
   phoneNumber: string;
+  role: string;
 }
 
 export interface DateRange {
@@ -70,6 +71,7 @@ export interface AuthState {
   token: string | null;
   isLoading: boolean;
   error: string | null;
+  role: string;
 }
 
 export interface ResetPasswordPayload {

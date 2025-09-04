@@ -18,13 +18,35 @@ interface LoginResponse {
   result: {
     access_token: string;
     user: {
-      firstName: string;
-      lastName: string;
+      firstName?: string;
+      lastName?: string;
       email: string;
-      phoneNumber: string;
+      phoneNumber?: string;
     }
   }
 }
+
+// Sửa lại hàm helper để decode JWT token và xử lý đúng các ký tự tiếng Việt
+const decodeToken = (token: string): any => {
+  try {
+    // Base64 decode phần payload của token (phần thứ 2 sau dấu .)
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    
+    // Decode base64 thành chuỗi UTF-8
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error('Failed to decode token:', error);
+    return {};
+  }
+};
 
 export const authService = {
   register: async (data: RegisterData) => {
@@ -94,14 +116,26 @@ export const authService = {
     try {
       console.log('Login API - sending credentials:', API_URL, credentials);
       const response = await axios.post<LoginResponse>(`${API_URL}/auth/login`, credentials, {
-        withCredentials: true,
-      });
-
-
+      withCredentials: true,
+    });
+      console.log('Login API response:', response.data);
+      
+      // Giải mã token để lấy thông tin role và các thông tin khác
+      const decodedToken = decodeToken(response.data.result.access_token);
+      console.log('Decoded token:', decodedToken);
+      
+      // Format lại response để phù hợp với state, bao gồm thông tin role
       return {
         statusCode: response.data.statusCode,
         message: response.data.message,
-        data: response.data.result.user,
+        data: {
+          ...response.data.result.user,
+          firstName: decodedToken.firstName || '',
+          lastName: decodedToken.lastName || '',
+          phoneNumber: decodedToken.phoneNumber || '',
+          role: decodedToken.role || 'user',
+          id: decodedToken._id || ''
+        },
         token: response.data.result.access_token
       };
     } catch (error: any) {
@@ -115,7 +149,6 @@ export const authService = {
     });
     return res.data;
   },
-
 
   // Đổi mật khẩu mới sau khi xác thực OTP
   resetPassword: async (payload: ResetPasswordPayload) => {
@@ -140,16 +173,10 @@ export const authService = {
 
   getProfile: async (token: string) => {
     try {
-      // Add timestamp to prevent caching
-      const timestamp = new Date().getTime();
-      const response = await axios.get(`${API_URL}/auth/profile?_t=${timestamp}`, {
+      const response = await axios.get(`${API_URL}/auth/profile`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        // Add cache control headers
-        params: {
-          _: timestamp // Add a cache-busting query parameter
-        }
       });
 
 
