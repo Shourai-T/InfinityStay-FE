@@ -6,10 +6,8 @@ import ChatUserList from "../Chat/ChatUserList";
 import ChatMessageItem from "../Chat/ChatMessageItem";
 import io from "socket.io-client";
 
-const SOCKET_URL =
-  import.meta.env.VITE_SOCKET_URL || "https://infinity-stay.mtri.online/chat";
-const API_URL =
-  import.meta.env.VITE_API_URL || "https://infinity-stay.mtri.online/api";
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface Conversation {
   _id: string;
@@ -50,6 +48,8 @@ const ChatSection: React.FC<ChatSectionProps> = ({
   // Lấy email admin từ localStorage key 'user'
   const user = localStorage.getItem("user");
   const adminEmail = user ? JSON.parse(user).email : null;
+  // Lấy user từ conversation (không dùng users prop nữa)
+  const currentConv = conversations.find((c) => c.userEmail === selectedUser);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -85,7 +85,6 @@ const ChatSection: React.FC<ChatSectionProps> = ({
 
     setConversationId(conv._id);
     setToUserEmail(conv.userEmail);
-    console.log("Selected conversation:", conv);
 
     // Connect socket với Bearer token
     const token = localStorage.getItem("token");
@@ -98,10 +97,6 @@ const ChatSection: React.FC<ChatSectionProps> = ({
     const socket = socketRef.current;
 
     // Join room
-    console.log("Join room:", {
-      conversationId: conv._id,
-      toUserEmail: conv.userEmail,
-    });
     socket.emit("chat:joinRoom", {
       conversationId: conv._id,
       toUserEmail: conv.userEmail,
@@ -135,7 +130,6 @@ const ChatSection: React.FC<ChatSectionProps> = ({
 
     // Khi có tin nhắn mới (từ user hoặc admin)
     socket.on("chat:newMessage", (msg: any) => {
-      console.log("chat:newMessage", msg);
       const isAdmin = msg.fromEmail === adminEmail;
       const newMessage: ChatMessage = {
         id: msg._id || Date.now().toString(),
@@ -167,10 +161,6 @@ const ChatSection: React.FC<ChatSectionProps> = ({
 
     return () => {
       // Leave room khi đổi user
-      console.log("Leave room:", {
-        conversationId: conv._id,
-        toUserEmail: conv.userEmail,
-      });
       socket.emit("chat:leaveRoom", {
         conversationId: conv._id,
         toUserEmail: conv.userEmail,
@@ -189,11 +179,6 @@ const ChatSection: React.FC<ChatSectionProps> = ({
       return;
 
     // Emit chat:send với toUserEmail
-    console.log("Send message:", {
-      text: newMessage,
-      toUserEmail,
-      conversationId,
-    });
     socketRef.current.emit("chat:send", {
       text: newMessage,
       toUserEmail,
@@ -202,9 +187,6 @@ const ChatSection: React.FC<ChatSectionProps> = ({
 
     setNewMessage("");
   };
-
-  // Lấy user từ conversation (không dùng users prop nữa)
-  const currentConv = conversations.find((c) => c.userEmail === selectedUser);
 
   return (
     <div className="space-y-8">
@@ -222,53 +204,69 @@ const ChatSection: React.FC<ChatSectionProps> = ({
         />
 
         <div className="lg:col-span-3 card-luxury rounded-2xl flex flex-col">
-          {/* Chat Header */}
-          <div className="p-6 border-b border-midnight-700/50">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-royal rounded-full flex items-center justify-center">
-                <span className="text-white font-semibold">
-                  {currentConv?.userEmail.charAt(0)}
-                </span>
-              </div>
-              <div>
-                <div className="font-heading font-semibold text-white">
-                  {currentConv?.userEmail}
+          {/* Nếu chưa chọn user, hiển thị UI yêu cầu chọn đoạn hội thoại */}
+          {!selectedUser ? (
+            <div className="flex flex-1 items-center justify-center">
+              <div className="text-center">
+                <div className="text-lg font-heading font-semibold text-lavender-300 mb-2">
+                  Vui lòng chọn đoạn hội thoại
                 </div>
-                {/* Có thể hiển thị lastMessage hoặc trạng thái khác nếu muốn */}
+                <div className="text-sm text-lavender-400">
+                  Chọn khách hàng để bắt đầu trò chuyện.
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <>
+              {/* Chat Header */}
+              <div className="p-6 border-b border-midnight-700/50">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-royal rounded-full flex items-center justify-center">
+                    <span className="text-white font-semibold">
+                      {currentConv?.userEmail.charAt(0)}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="font-heading font-semibold text-white">
+                      {currentConv?.userEmail}
+                    </div>
+                    {/* Có thể hiển thị lastMessage hoặc trạng thái khác nếu muốn */}
+                  </div>
+                </div>
+              </div>
 
-          {/* Messages */}
-          <div className="flex-1 p-6 overflow-y-auto max-h-[420px]">
-            <div className="space-y-4">
-              {chatMessages.map((message) => (
-                <ChatMessageItem key={message.id} message={message} />
-              ))}
-              <div ref={messagesEndRef} />
-            </div>
-          </div>
+              {/* Messages */}
+              <div className="flex-1 p-6 overflow-y-auto max-h-[420px]">
+                <div className="space-y-4">
+                  {chatMessages.map((message) => (
+                    <ChatMessageItem key={message.id} message={message} />
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
+              </div>
 
-          {/* Message Input */}
-          <div className="p-6 border-t border-midnight-700/50">
-            <div className="flex items-center space-x-4">
-              <input
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                placeholder="Nhập tin nhắn..."
-                className="form-input flex-1 px-4 py-3 rounded-xl font-body"
-              />
-              <button
-                onClick={handleSendMessage}
-                className="btn-primary px-6 py-3 rounded-xl font-body flex items-center space-x-2"
-              >
-                <Send className="h-4 w-4" />
-                <span>Gửi</span>
-              </button>
-            </div>
-          </div>
+              {/* Message Input */}
+              <div className="p-6 border-t border-midnight-700/50">
+                <div className="flex items-center space-x-4">
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                    placeholder="Nhập tin nhắn..."
+                    className="form-input flex-1 px-4 py-3 rounded-xl font-body"
+                  />
+                  <button
+                    onClick={handleSendMessage}
+                    className="btn-primary px-6 py-3 rounded-xl font-body flex items-center space-x-2"
+                  >
+                    <Send className="h-4 w-4" />
+                    <span>Gửi</span>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

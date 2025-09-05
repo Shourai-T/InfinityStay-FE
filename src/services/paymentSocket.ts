@@ -29,36 +29,36 @@ export const connectPaymentSocket = (
     socket.disconnect();
   }
 
-  console.log("Attempting to connect to WebSocket server...");
-  console.log("Email being used for connection:", email);
+  // console.log("Attempting to connect to WebSocket server...");
+  // console.log("Email being used for connection:", email);
 
   // Connect to the WebSocket server
   socket = io("wss://infinity-stay.mtri.online/transactions", socketOptions);
 
   // Log successful connection
   socket.on("connect", () => {
-    console.log("Socket connected successfully with ID:", socket?.id);
+    // console.log("Socket connected successfully with ID:", socket?.id);
 
     // Join the transaction channel with user email after successful connection
     if (socket) {
       socket.emit("join", email);
-      console.log("Emitted join event with email:", email);
+      // console.log("Emitted join event with email:", email);
     }
   });
 
   // Listen for all events (debugging)
   socket.onAny((event: string, ...args: any[]) => {
-    console.log(`Socket event received: ${event}`, args);
+    // console.log(`Socket event received: ${event}`, args);
   });
 
   // Listen for payment URL
   socket.on("paymentUrl", (data: any) => {
-    console.log("Payment URL event received!", data);
+    // console.log("Payment URL event received!", data);
 
     try {
       // Handle ZaloPay structure: {bookingId, payUrl}
       if (data && typeof data === "object" && data.payUrl) {
-        console.log("Found ZaloPay payment URL:", data.payUrl);
+        // console.log("Found ZaloPay payment URL:", data.payUrl);
         onPaymentUrl(data.payUrl);
       }
       // Fallback for direct string URL
@@ -90,7 +90,7 @@ export const connectPaymentSocket = (
     // Try to reconnect manually if socket.io's automatic reconnection fails
     setTimeout(() => {
       if (socket && !socket.connected) {
-        console.log("Attempting manual reconnection...");
+        // console.log("Attempting manual reconnection...");
         socket.connect();
       }
     }, 3000);
@@ -98,11 +98,11 @@ export const connectPaymentSocket = (
 
   // Handle disconnection
   socket.on("disconnect", (reason: string) => {
-    console.log("Socket disconnected:", reason);
+    // console.log("Socket disconnected:", reason);
     if (reason === "io server disconnect" || reason === "transport close") {
       // If the server disconnected us, try to reconnect manually
       setTimeout(() => {
-        console.log("Attempting to reconnect after disconnection...");
+        // console.log("Attempting to reconnect after disconnection...");
         if (socket) socket.connect();
       }, 2000);
     }
@@ -111,7 +111,7 @@ export const connectPaymentSocket = (
   // Return a cleanup function
   return () => {
     if (socket) {
-      console.log("Cleaning up socket connection");
+      // console.log("Cleaning up socket connection");
       socket.disconnect();
       socket = null;
     }

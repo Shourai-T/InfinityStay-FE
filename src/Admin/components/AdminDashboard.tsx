@@ -21,13 +21,14 @@ const AdminDashboard: React.FC = () => {
   const [users, setUsers] = useState<User[]>(mockUsers);
   const [chatMessages, setChatMessages] =
     useState<ChatMessage[]>(mockChatMessages);
-  const [selectedUser, setSelectedUser] = useState<string>("1");
+  const [selectedUser, setSelectedUser] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
 
   return (
     <div className="min-h-screen bg-gradient-luxury flex-col">
       <AdminHeader sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="flex">
+        {/* Sidebar cố định */}
         <AdminSidebar
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -36,7 +37,9 @@ const AdminDashboard: React.FC = () => {
         />
 
         {/* Main Content */}
-        <div className="flex-1 overflow-auto">
+        <div
+          className={`flex-1 overflow-auto ${sidebarOpen ? "pl-64" : "pl-16"}`}
+        >
           <div className="p-8">
             {activeTab === "overview" && <OverviewSection />}
 

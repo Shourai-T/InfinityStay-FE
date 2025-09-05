@@ -1,25 +1,5 @@
-import React, { useState } from "react";
-import {
-  Calendar,
-  Users,
-  Star,
-  Wifi,
-  Car,
-  Coffee,
-  Shield,
-  MapPin,
-  Phone,
-  Mail,
-  Sparkles,
-  Crown,
-  Gem,
-  ChevronDownIcon,
-} from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { showToast } from "../utils/toast";
-import { rooms } from "../data/rooms";
-import { formatCurrency } from "../utils/dateUtils";
-import HomeImg from "../assets/imgs/home_img.jpg";
 import { RoomSlider } from "../components/home/RoomSlider";
 import { HomeHero } from "../components/home/HomeHero";
 import { HomeFeatures } from "../components/home/HomeFeatures";

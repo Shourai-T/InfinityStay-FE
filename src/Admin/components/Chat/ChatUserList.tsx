@@ -43,7 +43,6 @@ const ChatUserList: React.FC<ChatUserListProps> = ({
       .then((data) => {
         // Chuẩn hóa lấy từ data.result.items (không phải data.items)
         const convs = data.result?.items || [];
-        console.log("Fetched admin conversations:", convs);
         setLocalConversations(convs);
         if (setConversations) setConversations(convs);
       });
