@@ -29,11 +29,10 @@ export interface User {
 
 export interface ChatMessage {
   id: string;
-  userId: string;
-  userName: string;
-  message: string;
+  text: string;
+  sender: "user" | "admin";
   timestamp: Date;
-  isAdmin: boolean;
+  senderName: string;
 }
 
 export interface BookingEvent {

@@ -1,9 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { MessageCircle, X, Send, User, Bot } from "lucide-react";
-// Thay useAuth bằng useSelector từ redux
 import { useSelector } from "react-redux";
-import { RootState } from "../store"; // Đảm bảo đã có RootState
+import { RootState } from "../store";
+import io from "socket.io-client";
+
+const SOCKET_URL = "wss://infinity-stay.mtri.online/chat";
+const API_URL = "https://infinity-stay.mtri.online/api/chat";
 
 interface Message {
   id: string;
@@ -16,6 +19,7 @@ interface Message {
 const ChatPopup: React.FC = () => {
   // Lấy state từ redux
   const user = useSelector((state: RootState) => state.auth.user);
+  const token = useSelector((state: RootState) => state.auth.token);
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
@@ -29,6 +33,9 @@ const ChatPopup: React.FC = () => {
     },
   ]);
   const [isTyping, setIsTyping] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(true);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const socketRef = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -39,58 +46,126 @@ const ChatPopup: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = () => {
-    if (!message.trim() || !user) return;
+  // Connect socket and fetch messages
+  useEffect(() => {
+    if (!user || !token || !isOpen) return;
 
-    const newMessage: Message = {
-      id: Date.now().toString(),
+    console.log("Socket connected");
+
+    // Connect socket
+    const socket = io(SOCKET_URL, {
+      transports: ["websocket"],
+      auth: { token: `${token}` },
+    });
+    socketRef.current = socket;
+
+    // Listen for conversation ready
+    socket.on("chat:conversation:ready", (data: { conversationId: string }) => {
+      console.log("chat:conversation:ready", data);
+      setConversationId(data.conversationId);
+
+      // Fetch messages
+      fetch(`${API_URL}/${data.conversationId}/messages`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          // Sửa lại lấy từ res.items
+          console.log("Fetched messages", res.result);
+          if (Array.isArray(res.result.items)) {
+            setMessages(
+              res.result.items.map((msg: any) => ({
+                id: msg._id,
+                text: msg.text,
+                sender: msg.fromEmail === user.email ? "user" : "admin",
+                timestamp: new Date(msg.createdAt),
+                senderName:
+                  msg.fromEmail === user.email
+                    ? user.firstName
+                    : "Admin Support",
+              }))
+            );
+          }
+        });
+    });
+
+    // // Listen for new messages (inboxUpdated)
+    // socket.on("chat:inboxUpdated", (msg: any) => {
+    //   console.log("chat:inboxUpdated", msg);
+    //   // Recall get chat messages
+    //   if (conversationId) {
+    //     fetch(`${API_URL}/${conversationId}/messages`, {
+    //       headers: { Authorization: `Bearer ${token}` },
+    //     })
+    //       .then((res) => res.json())
+    //       .then((res) => {
+    //         console.log("Re-fetched messages after inboxUpdated", res.result);
+    //         // Chỉ setMessages nếu có items và items.length > 0
+    //         if (
+    //           res.result &&
+    //           Array.isArray(res.result.items) &&
+    //           res.result.items.length > 0
+    //         ) {
+    //           setMessages(
+    //             res.result.items.map((msg: any) => ({
+    //               id: msg._id,
+    //               text: msg.text,
+    //               sender: msg.fromEmail === user.email ? "user" : "admin",
+    //               timestamp: new Date(msg.createdAt),
+    //               senderName:
+    //                 msg.fromEmail === user.email
+    //                   ? user.firstName
+    //                   : "Admin Support",
+    //             }))
+    //           );
+    //         }
+    //       });
+    //   }
+    // });
+
+    // Khi có tin nhắn mới (từ user hoặc admin)
+    socket.on("chat:newMessage", (msg: any) => {
+      console.log("chat:newMessage", msg);
+
+      const newMessage: Message = {
+        id: msg._id || Date.now().toString(),
+        text: msg.text,
+        sender: msg.fromEmail === user.email ? "user" : "admin",
+        timestamp: new Date(msg.createdAt || Date.now()),
+        senderName:
+          msg.fromEmail === user.email ? user.firstName : "Admin Support",
+      };
+
+      // Thêm tin nhắn mới vào danh sách
+      setMessages((prev) => [...prev, newMessage]);
+    });
+
+    // Request conversation
+    console.log("emit chat:conversation:ready");
+    socket.emit("chat:conversation:ready");
+
+    return () => {
+      console.log("Socket disconnect");
+      socket.disconnect();
+    };
+  }, [user, token, isOpen]);
+
+  // Gửi tin nhắn qua socket
+  const handleSendMessage = () => {
+    if (!message.trim() || !user || !conversationId || !socketRef.current)
+      return;
+
+    const msgObj = {
       text: message.trim(),
-      sender: "user",
-      timestamp: new Date(),
-      senderName: user.firstName || "Bạn",
+      toUserEmail: null,
+      conversationId: conversationId,
     };
 
-    setMessages((prev) => [...prev, newMessage]);
+    console.log("emit chat:send", msgObj);
+    socketRef.current.emit("chat:send", msgObj);
+
     setMessage("");
-
-    // Simulate admin typing and response
-    setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
-      const adminResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        text: getAdminResponse(message.trim()),
-        sender: "admin",
-        timestamp: new Date(),
-        senderName: "Admin Support",
-      };
-      setMessages((prev) => [...prev, adminResponse]);
-    }, 2000);
-  };
-
-  const getAdminResponse = (userMessage: string): string => {
-    const lowerMessage = userMessage.toLowerCase();
-
-    if (lowerMessage.includes("giá") || lowerMessage.includes("price")) {
-      return "Giá phòng của chúng tôi từ 2.500.000 VNĐ/đêm. Bạn có muốn xem chi tiết các loại phòng không?";
-    } else if (
-      lowerMessage.includes("đặt phòng") ||
-      lowerMessage.includes("booking")
-    ) {
-      return 'Để đặt phòng, bạn có thể truy cập trang "Phòng & Giá" hoặc gọi hotline 1900-xxxx. Chúng tôi sẽ hỗ trợ bạn ngay!';
-    } else if (
-      lowerMessage.includes("địa chỉ") ||
-      lowerMessage.includes("location")
-    ) {
-      return "Infinity Stay tọa lạc tại trung tâm thành phố với vị trí thuận tiện. Bạn có cần thông tin chi tiết về cách di chuyển không?";
-    } else if (
-      lowerMessage.includes("dịch vụ") ||
-      lowerMessage.includes("service")
-    ) {
-      return "Chúng tôi cung cấp đầy đủ dịch vụ: WiFi miễn phí, bữa sáng, spa, gym, và dịch vụ phòng 24/7. Bạn quan tâm dịch vụ nào?";
-    } else {
-      return "Cảm ơn bạn đã liên hệ! Chúng tôi đã ghi nhận tin nhắn và sẽ phản hồi sớm nhất có thể. Bạn có câu hỏi gì khác không?";
-    }
+    setIsTyping(false);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
