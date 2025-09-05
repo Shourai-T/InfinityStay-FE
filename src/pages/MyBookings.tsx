@@ -408,18 +408,18 @@ export default function MyBookings() {
                             Thông tin khách hàng
                           </h4>
                           <div className="space-y-3 text-sm font-body">
-                            <div>
+                            {/* <div>
                               <span className="text-lavender-400">
                                 Họ và tên:
                               </span>
                               <span className="ml-2 text-soft-white">
                                 {booking.guestName}
                               </span>
-                            </div>
+                            </div> */}
                             <div>
                               <span className="text-lavender-400">Email:</span>
                               <span className="ml-2 text-soft-white">
-                                {booking.guestEmail}
+                                {booking.userEmail || "Chưa cập nhật"}
                               </span>
                             </div>
                             <div>
@@ -427,7 +427,7 @@ export default function MyBookings() {
                                 Điện thoại:
                               </span>
                               <span className="ml-2 text-soft-white">
-                                {booking.phoneNumber}
+                                {booking.userPhone || "Chưa cập nhật"}
                               </span>
                             </div>
                           </div>
@@ -453,7 +453,7 @@ export default function MyBookings() {
                                 Ngày đặt:
                               </span>
                               <span className="ml-2 text-soft-white">
-                                {formatDate(booking.createAt)}
+                                {formatDate(booking.createdAt)}
                               </span>
                             </div>
                             {booking.specialRequests && (

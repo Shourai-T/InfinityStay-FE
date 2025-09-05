@@ -24,9 +24,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      console.log("Login data:", formData);
       const result = await dispatch(login(formData)).unwrap();
-      console.log("Login result:", result);
 
       if (result.data) {
         const user = result.data;

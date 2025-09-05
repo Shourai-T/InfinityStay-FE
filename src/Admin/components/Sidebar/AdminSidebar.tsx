@@ -33,9 +33,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
   return (
     <div
-      className={`${
-        sidebarOpen ? "w-64" : "w-16"
-      } transition-all duration-300 bg-midnight-900/95 backdrop-blur-md border-r border-royal-500/20 flex flex-col`}
+      className={`fixed top-[72px] left-0 h-[calc(100vh-72px)] z-30
+        ${sidebarOpen ? "w-64" : "w-16"}
+        transition-all duration-300 bg-midnight-900/95 backdrop-blur-md border-r border-royal-500/20 flex flex-col
+      `}
     >
       {/* Sidebar Header */}
       <div

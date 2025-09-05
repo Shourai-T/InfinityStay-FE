@@ -83,10 +83,7 @@ export default function Register() {
         confirmPassword: rest.confirmPassword,
       };
 
-      console.log("Submitting registration data:", registerData);
-
       const response = await authService.register(registerData);
-      console.log("Registration response:", response);
 
       showToast.success("Đăng ký thành công! Vui lòng xác thực email của bạn");
 

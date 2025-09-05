@@ -18,15 +18,15 @@ import { Filters, RoomType } from "../types";
 
 const Rooms = () => {
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState<Filters>({
-    checkIn: "",
-    checkOut: "",
-    guests: 1,
-    maxPrice: 6000000,
-    roomType: "all",
-  });
-
   const bookingData = useSelector((state: RootState) => state.booking);
+
+  const [filters, setFilters] = useState<Filters>({
+    checkIn: bookingData.dateRange?.checkIn || "",
+    checkOut: bookingData.dateRange?.checkOut || "",
+    guests: bookingData.guests || 1,
+    maxPrice: 6000000,
+    roomType: bookingData.roomType || "all",
+  });
 
   useEffect(() => {
     setFilters((prev) => ({

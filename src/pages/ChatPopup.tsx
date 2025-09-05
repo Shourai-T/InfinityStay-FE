@@ -50,8 +50,6 @@ const ChatPopup: React.FC = () => {
   useEffect(() => {
     if (!user || !token || !isOpen) return;
 
-    console.log("Socket connected");
-
     // Connect socket
     const socket = io(SOCKET_URL, {
       transports: ["websocket"],
@@ -61,7 +59,6 @@ const ChatPopup: React.FC = () => {
 
     // Listen for conversation ready
     socket.on("chat:conversation:ready", (data: { conversationId: string }) => {
-      console.log("chat:conversation:ready", data);
       setConversationId(data.conversationId);
 
       // Fetch messages
@@ -71,7 +68,6 @@ const ChatPopup: React.FC = () => {
         .then((res) => res.json())
         .then((res) => {
           // Sửa lại lấy từ res.items
-          console.log("Fetched messages", res.result);
           if (Array.isArray(res.result.items)) {
             setMessages(
               res.result.items.map((msg: any) => ({
@@ -91,7 +87,6 @@ const ChatPopup: React.FC = () => {
 
     // // Listen for new messages (inboxUpdated)
     // socket.on("chat:inboxUpdated", (msg: any) => {
-    //   console.log("chat:inboxUpdated", msg);
     //   // Recall get chat messages
     //   if (conversationId) {
     //     fetch(`${API_URL}/${conversationId}/messages`, {
@@ -99,7 +94,6 @@ const ChatPopup: React.FC = () => {
     //     })
     //       .then((res) => res.json())
     //       .then((res) => {
-    //         console.log("Re-fetched messages after inboxUpdated", res.result);
     //         // Chỉ setMessages nếu có items và items.length > 0
     //         if (
     //           res.result &&
@@ -125,8 +119,6 @@ const ChatPopup: React.FC = () => {
 
     // Khi có tin nhắn mới (từ user hoặc admin)
     socket.on("chat:newMessage", (msg: any) => {
-      console.log("chat:newMessage", msg);
-
       const newMessage: Message = {
         id: msg._id || Date.now().toString(),
         text: msg.text,
@@ -141,11 +133,9 @@ const ChatPopup: React.FC = () => {
     });
 
     // Request conversation
-    console.log("emit chat:conversation:ready");
     socket.emit("chat:conversation:ready");
 
     return () => {
-      console.log("Socket disconnect");
       socket.disconnect();
     };
   }, [user, token, isOpen]);
@@ -161,7 +151,6 @@ const ChatPopup: React.FC = () => {
       conversationId: conversationId,
     };
 
-    console.log("emit chat:send", msgObj);
     socketRef.current.emit("chat:send", msgObj);
 
     setMessage("");
