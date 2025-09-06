@@ -5,8 +5,11 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import { BookingEvent } from "../../types/types";
 import SectionHeader from "../UI/SectionHeader";
 import axios from "axios";
-import { Eye, Search } from "lucide-react";
+import { Eye, Search, Plus, X, Save } from "lucide-react";
 import { formatCurrency } from "../../../utils/dateUtils";
+import { getRooms } from "../../services/RoomsService";
+import BookingModal from "../UI/BookingModal";
+import { showToast } from "../../../utils/toast";
 
 interface BookingsSectionProps {
   bookings: BookingEvent[];
@@ -34,7 +37,7 @@ interface BookingTableItem {
   roomName: string;
   dates: string;
   amount: number;
-  status: "confirmed" | "pending" | "cancelled";
+  status: "confirmed" | "pending" | "cancelled" | "checked_in";
   numberOfGuests: number;
 }
 
@@ -49,6 +52,36 @@ const BookingsSection: React.FC<BookingsSectionProps> = ({ bookings }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Modal state
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [roomsList, setRoomsList] = useState<{ id: string; name: string }[]>(
+    []
+  );
+  const [createForm, setCreateForm] = useState({
+    roomId: "",
+    checkInDate: "",
+    checkOutDate: "",
+    numberOfGuests: 1,
+    typeBooking: "daily",
+    note: "",
+    userEmail: "",
+    userPhone: "",
+    method: "BANK_TRANSFER",
+  });
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [bookingForm, setBookingForm] = useState({
+    roomId: "",
+    checkInDate: "",
+    checkOutDate: "",
+    numberOfGuests: 1,
+    typeBooking: "daily",
+    note: "",
+    userEmail: "",
+    userPhone: "",
+    method: "BANK_TRANSFER",
+  });
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     fetchCalendarData();
@@ -88,47 +121,56 @@ const BookingsSection: React.FC<BookingsSectionProps> = ({ bookings }) => {
         Array.isArray(response.data.result)
       ) {
         const apiBookings = response.data.result;
+        console.log("Fetched bookings:", apiBookings);
 
-        // Transform API data to BookingEvent format for calendar
+        // Lấy tất cả booking, nếu là checkout thì set status là "checkout"
         const formattedEvents = apiBookings
-          .filter((booking: ApiBooking) => !booking.isCheckOut) // Filter out checkout entries as they're duplicates
-          .map((booking: ApiBooking) => ({
-            id: parseInt(booking.bookingId.replace(/\D/g, "") || "0"), // Extract numeric part or use 0
-            title: `${booking.userEmail} - ${booking.numberOfGuests} khách`,
+          .filter((booking: ApiBooking) => !booking.isCheckOut)
+          .map((booking: any) => ({
+            id: parseInt(booking.bookingId.replace(/\D/g, "") || "0"),
+            title: `${booking.userEmail || ""} - ${
+              booking.numberOfGuests
+            } khách`,
             start: new Date(booking.checkInDate),
             end: new Date(booking.checkOutDate),
             resource: {
-              status: booking.status,
+              status: booking.isCheckOut ? "checkout" : booking.status,
               amount: booking.totalPrice,
             },
           }));
 
         setCalendarEvents(formattedEvents);
 
-        // Transform API data to BookingTableItem format for the table
         const formattedTableData = apiBookings
-          .filter((booking: ApiBooking) => !booking.isCheckOut) // Filter out checkout entries
-          .map((booking: ApiBooking) => {
-            // Format dates for display
+          .filter((booking: ApiBooking) => !booking.isCheckOut)
+          .map((booking: any) => {
             const checkIn = new Date(booking.checkInDate);
             const checkOut = new Date(booking.checkOutDate);
             const formattedDates = `${checkIn.toLocaleDateString(
               "vi-VN"
             )} - ${checkOut.toLocaleDateString("vi-VN")}`;
 
-            // Extract username from email (before @ symbol)
             const customerName =
-              booking.userEmail.split("@")[0] || booking.userEmail;
+              booking.userEmail?.split("@")[0] || booking.userEmail || "";
+
+            const roomName =
+              booking.room?.name || booking.roomName || "Phòng không xác định";
 
             return {
               id: booking.bookingId,
               customerName: customerName,
-              customerEmail: booking.userEmail,
-              customerPhone: booking.userPhone,
-              roomName: booking.roomId || "Phòng không xác định",
+              customerEmail: booking.userEmail || "",
+              customerPhone: booking.userPhone || "",
+              roomName: roomName,
               dates: formattedDates,
               amount: booking.totalPrice,
-              status: booking.status as "confirmed" | "pending" | "cancelled",
+              status: booking.isCheckOut
+                ? "checkout"
+                : (booking.status as
+                    | "confirmed"
+                    | "pending"
+                    | "cancelled"
+                    | "checked_in"),
               numberOfGuests: booking.numberOfGuests,
             };
           });
@@ -207,15 +249,135 @@ const BookingsSection: React.FC<BookingsSectionProps> = ({ bookings }) => {
     }
   };
 
+  // Fetch rooms for select
+  const fetchRoomsList = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await getRooms(token || "");
+      const items = res.data?.result || [];
+      // Đảm bảo lấy đúng roomId, không lấy name
+      setRoomsList(items.map((r: any) => ({ id: r.roomId, name: r.name })));
+    } catch {
+      setRoomsList([]);
+    }
+  };
+
+  // Open modal and fetch rooms
+  const openCreateModal = () => {
+    setShowBookingModal(true);
+    fetchRoomsList();
+  };
+
+  // Create booking handler
+  const handleCreateBooking = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreating(true);
+    try {
+      const token = localStorage.getItem("token");
+      console.log("Create booking request body:", createForm);
+      const response = await axios.post(
+        `${API_URL}/booking/create-booking-by-admin`,
+        createForm,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log("Create booking response:", response.data);
+      setShowCreateModal(false);
+      setCreateForm({
+        roomId: "",
+        checkInDate: "",
+        checkOutDate: "",
+        numberOfGuests: 1,
+        typeBooking: "daily",
+        note: "",
+        userEmail: "",
+        userPhone: "",
+        method: "BANK_TRANSFER",
+      });
+      fetchCalendarData(); // Refresh data
+    } catch (err) {
+      setCreating(false);
+      showToast.error("Tạo booking thất bại");
+    }
+    setCreating(false);
+  };
+
+  const handleBookingSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreating(true);
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await axios.post(
+        `${API_URL}/booking/create-booking-by-admin`,
+        bookingForm,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      setShowBookingModal(false);
+      setBookingForm({
+        roomId: "",
+        checkInDate: "",
+        checkOutDate: "",
+        numberOfGuests: 1,
+        typeBooking: "daily",
+        note: "",
+        userEmail: "",
+        userPhone: "",
+        method: "BANK_TRANSFER",
+      });
+      fetchCalendarData();
+    } catch (err) {
+      setCreating(false);
+      showToast.error("Tạo booking thất bại");
+    }
+    setCreating(false);
+  };
+
+  // Update booking status handler
+  const handleUpdateStatus = async (bookingId: string, status: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.patch(
+        `${API_URL}/booking/update-booking-status/${bookingId}`,
+        status,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      showToast.success("Cập nhật trạng thái thành công");
+      fetchCalendarData(); // Refresh data
+    } catch (err) {
+      showToast.error("Cập nhật trạng thái thất bại");
+    }
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="">
       <SectionHeader
         title="Quản lý đặt phòng"
         description="Lịch và danh sách đặt phòng"
       />
 
+      {/* Booking Modal */}
+      {showBookingModal && (
+        <BookingModal
+          open={showBookingModal}
+          onClose={() => setShowBookingModal(false)}
+          roomsList={roomsList}
+          bookingForm={bookingForm}
+          setBookingForm={setBookingForm}
+          creating={creating}
+          tableBookings={tableBookings}
+          onSubmit={handleBookingSubmit}
+        />
+      )}
+
       {/* Calendar View */}
-      <div className="card-luxury rounded-2xl p-8">
+      <div className="card-luxury rounded-2xl p-8 my-8">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-heading font-bold text-white">
             Lịch đặt phòng
@@ -228,13 +390,22 @@ const BookingsSection: React.FC<BookingsSectionProps> = ({ bookings }) => {
             </div>
           )}
 
-          <button
-            onClick={fetchCalendarData}
-            className="btn-primary px-4 py-2 text-sm rounded-lg"
-            disabled={loading}
-          >
-            Làm mới dữ liệu
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={fetchCalendarData}
+              className="btn-primary px-4 py-2 text-sm rounded-lg"
+              disabled={loading}
+            >
+              Làm mới dữ liệu
+            </button>
+            <button
+              onClick={openCreateModal}
+              className="btn-gold px-4 py-2 text-sm rounded-lg flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Tạo booking
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -346,12 +517,18 @@ const BookingsSection: React.FC<BookingsSectionProps> = ({ bookings }) => {
                     </span>
                   </td>
                   <td className="py-4 px-4">
-                    <button
-                      className="p-2 text-infinity-400 hover:bg-infinity-500/10 rounded-lg transition-colors duration-300"
-                      title="Xem chi tiết"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </button>
+                    {/* Đổi nút Eye thành nút Check-in */}
+                    {booking.status == "confirmed" && (
+                      <button
+                        className="p-2 text-green-400 hover:bg-green-500/10 rounded-lg transition-colors duration-300"
+                        title="Check-in khách"
+                        onClick={() =>
+                          handleUpdateStatus(booking.id, "checked_in")
+                        }
+                      >
+                        Check-in
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

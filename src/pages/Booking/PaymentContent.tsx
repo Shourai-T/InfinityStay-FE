@@ -2,7 +2,7 @@ import React from "react";
 import { Check, Copy, X, ExternalLink } from "lucide-react";
 
 interface PaymentContentProps {
-  paymentMethod: "online" | "onsite";
+  paymentMethod: "online";
   isGeneratingQR: boolean;
   paymentUrl: string;
   paymentStatus: "pending" | "checking" | "success" | "failed";

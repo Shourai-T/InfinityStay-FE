@@ -95,32 +95,34 @@ export default function MyBookings() {
   }
 
   // Error state
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-luxury flex items-center justify-center">
-        <div className="text-center card-luxury rounded-2xl p-12">
-          <XCircle className="h-16 w-16 text-red-400 mx-auto mb-6" />
-          <h3 className="text-2xl font-heading font-semibold text-soft-white mb-4">
-            Có lỗi xảy ra
-          </h3>
-          <p className="text-lavender-300 font-body mb-6">{error}</p>
-          <button
-            onClick={() =>
-              dispatch(getMyBookings({ params: { limit: 10, page: 1 } }))
-            }
-            className="btn-primary px-6 py-3 rounded-xl font-heading font-semibold"
-          >
-            Thử lại
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <div className="min-h-screen bg-gradient-luxury flex items-center justify-center">
+  //       <div className="text-center card-luxury rounded-2xl p-12">
+  //         <XCircle className="h-16 w-16 text-red-400 mx-auto mb-6" />
+  //         <h3 className="text-2xl font-heading font-semibold text-soft-white mb-4">
+  //           Có lỗi xảy ra
+  //         </h3>
+  //         <p className="text-lavender-300 font-body mb-6">{error}</p>
+  //         <button
+  //           onClick={() =>
+  //             dispatch(getMyBookings({ params: { limit: 10, page: 1 } }))
+  //           }
+  //           className="btn-primary px-6 py-3 rounded-xl font-heading font-semibold"
+  //         >
+  //           Thử lại
+  //         </button>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
-  const filteredBookings = bookings.filter((booking: any) => {
-    if (filter === "all") return true;
-    return booking.status === filter;
-  });
+  const filteredBookings = Array.isArray(bookings)
+    ? bookings.filter((booking: any) => {
+        if (filter === "all") return true;
+        return booking.status === filter;
+      })
+    : [];
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -302,7 +304,7 @@ export default function MyBookings() {
           <div className="space-y-6">
             {filteredBookings.map((booking: any) => (
               <div
-                key={booking.id}
+                key={booking.id || booking.bookingId}
                 className="card-luxury rounded-2xl overflow-hidden luxury-hover"
               >
                 <div className="p-8">
@@ -310,7 +312,9 @@ export default function MyBookings() {
                     <div>
                       <div className="flex items-center mb-3">
                         <h3 className="text-2xl font-heading font-semibold text-soft-white mr-4">
-                          {booking.room.name}
+                          {booking.room?.name ||
+                            booking.roomName ||
+                            "Phòng không xác định"}
                         </h3>
                         <span
                           className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-heading font-medium border ${getStatusColor(

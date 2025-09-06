@@ -101,8 +101,6 @@ export default function VerifyOTP() {
         url = API_URL + "/auth/verify-otp-forgot-password";
       }
 
-      console.log("Verifying OTP:", { url, data: verifyData });
-
       let result;
       if (type === "forgot-password") {
         result = await dispatch(verifyForgotPasswordOtp(verifyData)).unwrap();
