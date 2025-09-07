@@ -47,6 +47,14 @@ export default function VerifyOTP() {
   }, [email, type, navigate]);
 
   const handleOtpChange = (index: number, value: string) => {
+    // Nếu dán vào input đầu tiên và value là 6 số, tự động điền các ô
+    if (index === 0 && value.length === 6 && /^\d{6}$/.test(value)) {
+      const newOtp = value.split("");
+      setOtp(newOtp);
+      // Focus vào ô cuối cùng
+      inputRefs.current[5]?.focus();
+      return;
+    }
     if (value.length > 1) return;
 
     const newOtp = [...otp];
@@ -172,9 +180,20 @@ export default function VerifyOTP() {
                       key={index}
                       ref={(el) => (inputRefs.current[index] = el)}
                       type="text"
-                      maxLength={1}
+                      maxLength={index === 0 ? 6 : 1}
                       value={digit}
                       onChange={(e) => handleOtpChange(index, e.target.value)}
+                      onPaste={
+                        index === 0
+                          ? (e) => {
+                              const paste = e.clipboardData.getData("text");
+                              if (/^\d{6}$/.test(paste)) {
+                                e.preventDefault();
+                                handleOtpChange(0, paste);
+                              }
+                            }
+                          : undefined
+                      }
                       onKeyDown={(e) => handleKeyDown(index, e)}
                       className="w-12 h-12 text-center text-xl font-heading font-bold form-input rounded-xl border-2 border-royal-500/30 focus:border-royal-500"
                     />
