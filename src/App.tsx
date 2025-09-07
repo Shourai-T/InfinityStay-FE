@@ -7,6 +7,7 @@ import AdminRoute from "./components/AdminRoute";
 import UserRoute from "./components/UserRoute";
 import PublicRoute from "./components/PublicRoute";
 import ChatPopup from "./pages/ChatPopup";
+import PaymentCf from "./pages/Payment/PaymentCf";
 
 // Lazy load pages for better performance
 const Home = lazy(() => import("./pages/Home"));
@@ -106,6 +107,7 @@ function App() {
               </UserRoute>
             }
           />
+
           <Route
             path="/ho-so"
             element={
@@ -122,7 +124,14 @@ function App() {
               </UserRoute>
             }
           />
-
+          <Route
+            path="/payment-confirm"
+            element={
+              <UserRoute>
+                <PaymentCf />
+              </UserRoute>
+            }
+          />
           {/* Trang chỉ dành cho người chưa đăng nhập */}
           <Route
             path="/dang-nhap"

@@ -36,7 +36,6 @@ const PaymentContent: React.FC<PaymentContentProps> = ({
           </div>
         ) : paymentUrl ? (
           <div className="space-y-4">
-            {/* Payment Button/Link */}
             <div className="bg-royal-500/10 rounded-lg p-8 w-full text-center">
               <p className="text-lavender-300 mb-4">
                 Nhấn vào nút bên dưới để tiến hành thanh toán qua ZaloPay

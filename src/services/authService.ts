@@ -152,7 +152,6 @@ export const authService = {
     return res.data;
   },
 
-  // Đổi mật khẩu mới sau khi xác thực OTP
   resetPassword: async (payload: ResetPasswordPayload) => {
     try {
       const response = await axios.post(`${API_URL}/auth/reset-password`, payload);
@@ -166,7 +165,6 @@ export const authService = {
   forgotPassword: async (email: string) => {
     try {
       const response = await axios.post(`${API_URL}/auth/forgot-password`, { email });
-      // Trả về response.data (chứa statusCode, message, result)
       return response.data;
     } catch (error: any) {
       throw error.response?.data || error;
