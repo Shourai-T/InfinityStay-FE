@@ -31,23 +31,23 @@ export default function Confirmation() {
     window.scrollTo(0, 0);
   }, []);
 
-  if (!latestBooking) {
-    return (
-      <div className="min-h-screen bg-gradient-luxury flex items-center justify-center">
-        <div className="text-center card-luxury rounded-2xl p-12">
-          <p className="text-lavender-300 font-body mb-6">
-            Không tìm thấy thông tin đặt phòng
-          </p>
-          <button
-            onClick={() => navigate("/")}
-            className="btn-primary px-6 py-3 rounded-xl font-heading font-semibold"
-          >
-            Về trang chủ
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // if (!latestBooking) {
+  //   return (
+  //     <div className="min-h-screen bg-gradient-luxury flex items-center justify-center">
+  //       <div className="text-center card-luxury rounded-2xl p-12">
+  //         <p className="text-lavender-300 font-body mb-6">
+  //           Không tìm thấy thông tin đặt phòng
+  //         </p>
+  //         <button
+  //           onClick={() => navigate("/")}
+  //           className="btn-primary px-6 py-3 rounded-xl font-heading font-semibold"
+  //         >
+  //           Về trang chủ
+  //         </button>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   const nights = calculateNights(latestBooking.checkIn, latestBooking.checkOut);
 
@@ -63,15 +63,15 @@ export default function Confirmation() {
           <p className="text-xl opacity-90 font-body">
             Cảm ơn bạn đã đặt phòng tại Infinity Stay
           </p>
-          <p className="text-lg opacity-80 mt-2 font-body">
+          {/* <p className="text-lg opacity-80 mt-2 font-body">
             Chúng tôi đã gửi email xác nhận đến {latestBooking.guestEmail}
-          </p>
+          </p> */}
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+        {/* <div className="flex flex-col sm:flex-row gap-4 mb-8">
           <button
             onClick={() => navigate("/")}
             className="flex items-center justify-center px-6 py-3 border border-royal-500/30 rounded-xl hover:bg-royal-500/5 transition-colors duration-300 text-lavender-300 font-body"
@@ -93,11 +93,11 @@ export default function Confirmation() {
             <Download className="h-5 w-5 mr-2" />
             In xác nhận
           </button>
-        </div>
+        </div> */}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Booking Details */}
-          <div className="lg:col-span-2 space-y-6">
+          {/* <div className="lg:col-span-2 space-y-6">
             {/* Booking Info */}
             <div className="card-luxury rounded-2xl p-8">
               <h2 className="text-2xl font-heading font-bold mb-6 text-soft-white border-b border-royal-500/30 pb-4">
@@ -229,17 +229,17 @@ export default function Confirmation() {
                 </li>
               </ul>
             </div>
-          </div>
+          {/* </div> */} 
 
           {/* Booking Summary */}
           <div className="lg:col-span-1">
             <div className="card-luxury rounded-2xl p-8 sticky top-8">
-              <h3 className="text-xl font-heading font-semibold mb-6 text-soft-white">
+              {/* <h3 className="text-xl font-heading font-semibold mb-6 text-soft-white">
                 Tóm tắt đặt phòng
-              </h3>
+              </h3> */}
 
               {/* Dates */}
-              <div className="space-y-4 mb-6">
+              {/* <div className="space-y-4 mb-6">
                 <div className="flex items-center text-lavender-300 font-body">
                   <Calendar className="h-5 w-5 mr-3 text-royal-400" />
                   <div>
@@ -267,10 +267,10 @@ export default function Confirmation() {
                 <div className="text-sm text-lavender-300 font-body pl-8">
                   {nights} đêm
                 </div>
-              </div>
+              </div> */}
 
               {/* Price Details */}
-              <div className="border-t border-royal-500/30 pt-6 space-y-3">
+              {/* <div className="border-t border-royal-500/30 pt-6 space-y-3">
                 <div className="flex justify-between text-sm font-body">
                   <span className="text-lavender-300">
                     Phòng ({nights} đêm)
@@ -293,7 +293,7 @@ export default function Confirmation() {
                     </span>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               {/* Hotel Contact */}
               <div className="mt-6 pt-6 border-t border-royal-500/30">
