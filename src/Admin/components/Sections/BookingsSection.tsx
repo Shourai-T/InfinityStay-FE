@@ -121,7 +121,6 @@ const BookingsSection: React.FC<BookingsSectionProps> = ({ bookings }) => {
         Array.isArray(response.data.result)
       ) {
         const apiBookings = response.data.result;
-        console.log("Fetched bookings:", apiBookings);
 
         // Lấy tất cả booking, nếu là checkout thì set status là "checkout"
         const formattedEvents = apiBookings
@@ -274,7 +273,6 @@ const BookingsSection: React.FC<BookingsSectionProps> = ({ bookings }) => {
     setCreating(true);
     try {
       const token = localStorage.getItem("token");
-      console.log("Create booking request body:", createForm);
       const response = await axios.post(
         `${API_URL}/booking/create-booking-by-admin`,
         createForm,
@@ -282,7 +280,6 @@ const BookingsSection: React.FC<BookingsSectionProps> = ({ bookings }) => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("Create booking response:", response.data);
       setShowCreateModal(false);
       setCreateForm({
         roomId: "",
