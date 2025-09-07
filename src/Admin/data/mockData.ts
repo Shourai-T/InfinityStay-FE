@@ -10,9 +10,10 @@ export const revenueData = [
 ];
 
 export const roomTypeData = [
-  { name: "Deluxe", value: 45, color: "#6366f1" },
+  { name: "Single", value: 25, color: "#10b981" },
+  { name: "Double", value: 45, color: "#6366f1" },
   { name: "Suite", value: 30, color: "#fbbf24" },
-  { name: "Standard", value: 25, color: "#10b981" },
+  { name: "Vip", value: 25, color: "#ef4444" },
 ];
 
 export const mockBookings: BookingEvent[] = [
