@@ -27,6 +27,7 @@ import {
   connectPaymentSocket,
   disconnectPaymentSocket,
 } from "../../services/paymentSocket";
+import bookingService from "../../services/bookingService";
 
 export default function Booking() {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ export default function Booking() {
     guestPhone: user?.phoneNumber || "",
     guests: guests || 1,
     specialRequests: "",
-    paymentMethod: "online" as "online" | "onsite",
+    paymentMethod: "online" as "online",
   });
 
   useEffect(() => {
@@ -61,6 +62,9 @@ export default function Booking() {
   }, [user]);
 
   const [isLoading, setIsLoading] = useState(false);
+
+  // State lưu bookingId để kiểm tra trạng thái thanh toán
+  const [bookingId, setBookingId] = useState<string | null>(null);
 
   // State hiển thị PaymentContent
   const [showPayment, setShowPayment] = useState(false);
@@ -111,18 +115,34 @@ export default function Booking() {
     }
   };
 
-  const checkPaymentStatus = () => {
+  const checkPaymentStatus = async () => {
     setPaymentStatus("checking");
-    setTimeout(() => {
-      const success = Math.random() > 0.5;
-      setPaymentStatus(success ? "success" : "failed");
-      if (success) {
-        showToast.bookingSuccess(""); // Pass the booking ID if available
+    try {
+      const id = bookingId;
+      if (!id) {
+        setTimeout(() => {
+          setPaymentStatus("failed");
+          navigate("/thanh-toan-that-bai");
+        }, 1000);
+        return;
+      }
+      // Fetch booking status từ API
+      const res = await bookingService.getBookingById(id);
+      console.log("Booking status response:", res);
+      const status = res?.result?.status;
+      // Lưu lại thông tin booking mới nhất nếu cần, hoặc bỏ qua nếu không sử dụng
+      if (status === "success" || status === "confirmed") {
+        setPaymentStatus("success");
+        showToast.bookingSuccess(id);
         navigate("/xac-nhan");
       } else {
+        setPaymentStatus("failed");
         navigate("/thanh-toan-that-bai");
       }
-    }, 2000);
+    } catch {
+      setPaymentStatus("failed");
+      navigate("/thanh-toan-that-bai");
+    }
   };
 
   const onPaymentSuccess = async () => {
@@ -141,6 +161,11 @@ export default function Booking() {
       const apiResponse = await dispatch(
         createBooking(bookingPayload)
       ).unwrap();
+
+      console.log("Booking API response:", apiResponse);
+
+      setBookingId(apiResponse.result.bookingId);
+      // Lưu lại thông tin booking vừa tạo nếu cần, hoặc bỏ qua nếu không sử dụng
 
       // Tạo booking local để hiển thị
       const booking = {
@@ -162,41 +187,36 @@ export default function Booking() {
 
       dispatch(addBooking(booking));
 
-      // If payment method is online, connect to WebSocket to get payment URL
-      if (bookingData.paymentMethod === "online") {
-        // Connect to socket and store cleanup function
-        const cleanup = connectPaymentSocket(bookingData.guestEmail, (url) => {
-          setPaymentUrl(url);
+      // Only handle online payment
+      // Connect to socket and store cleanup function
+      const cleanup = connectPaymentSocket(bookingData.guestEmail, (url) => {
+        setPaymentUrl(url);
+        setIsGeneratingQR(false);
+      });
+
+      cleanupSocketRef.current = cleanup;
+
+      // Set a timeout for WebSocket connection as fallback
+      const timeoutId = setTimeout(() => {
+        if (!paymentUrl) {
           setIsGeneratingQR(false);
-        });
+          showToast.warning(
+            "Không thể kết nối với máy chủ thanh toán. Vui lòng liên hệ hỗ trợ."
+          );
+        }
+      }, 15000);
 
-        cleanupSocketRef.current = cleanup;
-
-        // Set a timeout for WebSocket connection as fallback
-        const timeoutId = setTimeout(() => {
-          if (!paymentUrl) {
-            // If we haven't received a payment URL after 15 seconds, show fallback UI
-            setIsGeneratingQR(false);
-            showToast.warning(
-              "Không thể kết nối với máy chủ thanh toán. Vui lòng liên hệ hỗ trợ."
-            );
-          }
-        }, 15000);
-
-        return () => {
-          clearTimeout(timeoutId);
-          if (cleanupSocketRef.current) {
-            cleanupSocketRef.current();
-          }
-        };
-      } else {
-        showToast.bookingSuccess(booking.id);
-        navigate("/xac-nhan");
-      }
+      return () => {
+        clearTimeout(timeoutId);
+        if (cleanupSocketRef.current) {
+          cleanupSocketRef.current();
+        }
+      };
     } catch (error: any) {
       showToast.error(error.message || "Tạo booking thất bại");
     }
   };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -206,28 +226,19 @@ export default function Booking() {
       return;
     }
 
-    // Nếu là thanh toán tại khách sạn => xử lý luôn
-    if (bookingData.paymentMethod === "onsite") {
-      setIsLoading(true);
-      setTimeout(onPaymentSuccess, 1500);
-      return;
-    }
-
-    // Nếu online => hiển thị PaymentContent và bắt đầu tạo booking
+    // Chỉ xử lý online payment
     setIsLoading(true);
     setShowPayment(true);
     setIsGeneratingQR(true);
-
-    // Gọi API booking ngay khi chọn thanh toán online
     onPaymentSuccess();
   };
 
   const handlePaymentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBookingData((prev) => ({
       ...prev,
-      paymentMethod: e.target.value as "online" | "onsite",
+      paymentMethod: "online",
     }));
-    setIsLoading(false); // Reset loading khi đổi hình thức thanh toán
+    setIsLoading(false);
   };
 
   return (
@@ -391,7 +402,6 @@ export default function Booking() {
                   <CreditCard className="h-6 w-6 mr-3 text-royal-400" />
                   Phương thức thanh toán
                 </h2>
-
                 <div className="space-y-4">
                   <label className="flex items-center p-6 border border-royal-500/30 rounded-xl cursor-pointer hover:bg-royal-500/5 transition-colors duration-300">
                     <input
@@ -408,25 +418,6 @@ export default function Booking() {
                       </div>
                       <div className="text-sm text-lavender-300 font-body">
                         Thanh toán ngay qua thẻ tín dụng/ghi nợ
-                      </div>
-                    </div>
-                  </label>
-
-                  <label className="flex items-center p-6 border border-royal-500/30 rounded-xl cursor-pointer hover:bg-royal-500/5 transition-colors duration-300">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="onsite"
-                      checked={bookingData.paymentMethod === "onsite"}
-                      onChange={handlePaymentChange}
-                      className="h-5 w-5 text-royal-500 border-royal-400 focus:ring-royal-500 bg-midnight-800"
-                    />
-                    <div className="ml-4">
-                      <div className="font-heading font-semibold text-soft-white">
-                        Thanh toán tại khách sạn
-                      </div>
-                      <div className="text-sm text-lavender-300 font-body">
-                        Thanh toán khi nhận phòng
                       </div>
                     </div>
                   </label>
