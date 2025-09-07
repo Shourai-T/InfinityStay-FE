@@ -52,16 +52,17 @@ export const authService = {
   register: async (data: RegisterData) => {
     try {
       const response = await axios.post(`${API_URL}/auth/register`, data);
+      // console.log('Register API response:', response.data);
       return {
         success: true,
         data: response.data,
         user: response.data?.data // API trả về user trong data.data
       };
     } catch (error: any) {
-      console.error('Register error response:', {
-        status: error.response?.status,
-        data: error.response?.data
-      });
+      // console.error('Register error response:', {
+      //   status: error.response?.status,
+      //   data: error.response?.data
+      // });
       throw error.response?.data || error;
     }
   },
@@ -73,12 +74,13 @@ export const authService = {
   }) => {
     try {
       const response = await axios.post(`${API_URL}/auth/verify-otp`, data);
+      // console.log('Verify OTP response:', response.data);
       return response.data;
     } catch (error: any) {
-      console.error('Verify OTP error:', {
-        status: error.response?.status,
-        data: error.response?.data
-      });
+      // console.error('Verify OTP error:', {
+      //   status: error.response?.status,
+      //   data: error.response?.data
+      // });
       throw error.response?.data || error;
     }
   },
@@ -86,12 +88,13 @@ export const authService = {
   verifyForgotPasswordOtp: async (data: { email: string; otp: string }) => {
     try {
       const response = await axios.post(`${API_URL}/auth/verify-otp-forgot-password`, data);
+      // console.log("Verify Forgot Password OTP response:", response.data);
       return response.data;
     } catch (error: any) {
-      console.error("Verify Forgot Password OTP error:", {
-        status: error.response?.status,
-        data: error.response?.data,
-      });
+      // console.error("Verify Forgot Password OTP error:", {
+      //   status: error.response?.status,
+      //   data: error.response?.data,
+      // });
       throw error.response?.data || error;
     }
   },
@@ -118,11 +121,11 @@ export const authService = {
       const response = await axios.post<LoginResponse>(`${API_URL}/auth/login`, credentials, {
       withCredentials: true,
     });
-      console.log('Login API response:', response.data);
+      // console.log('Login API response:', response.data);
       
       // Giải mã token để lấy thông tin role và các thông tin khác
       const decodedToken = decodeToken(response.data.result.access_token);
-      console.log('Decoded token:', decodedToken);
+      // console.log('Decoded token:', decodedToken);
       
       // Format lại response để phù hợp với state, bao gồm thông tin role
       return {
@@ -150,7 +153,6 @@ export const authService = {
     return res.data;
   },
 
-  // Đổi mật khẩu mới sau khi xác thực OTP
   resetPassword: async (payload: ResetPasswordPayload) => {
     try {
       const response = await axios.post(`${API_URL}/auth/reset-password`, payload);
@@ -164,7 +166,6 @@ export const authService = {
   forgotPassword: async (email: string) => {
     try {
       const response = await axios.post(`${API_URL}/auth/forgot-password`, { email });
-      // Trả về response.data (chứa statusCode, message, result)
       return response.data;
     } catch (error: any) {
       throw error.response?.data || error;
@@ -179,6 +180,7 @@ export const authService = {
         },
       });
 
+      // console.log("Get Profile API response:", response.data);
 
       return {
         success: true,
@@ -211,6 +213,7 @@ export const authService = {
         },
       });
 
+      // console.log('Update Profile API response:', response.data);
 
       return {
         success: true,
@@ -244,6 +247,11 @@ axios.interceptors.request.use(
       config.headers['Authorization'] = `Bearer ${token}`;
     }
 
+    // console.log('Request:', {
+    //   url: config.url,
+    //   method: config.method,
+    //   data: config.data,
+    // });
 
     return config;
   },
@@ -252,7 +260,11 @@ axios.interceptors.request.use(
 
 axios.interceptors.response.use(
   (response) => {
-
+    // console.log('Response:', {
+    //   url: response.config.url,
+    //   status: response.status,
+    //   data: response.data,
+    // });
     return response;
   },
   async (error) => {

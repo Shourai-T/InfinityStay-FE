@@ -75,11 +75,6 @@ const RoomModal: React.FC<RoomModalProps> = ({
       ...prev,
       images: [...(prev.images || []), ...files],
     }));
-
-    console.log(
-      "Files added:",
-      files.map((f) => f.name)
-    );
   };
 
   // Helper function to get image preview URL

@@ -32,7 +32,6 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, onEdit, onDelete }) => {
 
   const handleDelete = () => {
     if (room && room.id) {
-      console.log(`Requesting deletion of room: ${room.id}`);
       onDelete(room.id);
     } else {
       console.error("Cannot delete room: ID is missing", room);

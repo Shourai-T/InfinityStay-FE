@@ -23,18 +23,17 @@ const ProfilePage: React.FC = () => {
     email: user?.email || "",
   });
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const data = await dispatch(getUser()).unwrap();
-        console.log("Fetched user:", data);
-      } catch (err) {
-        console.error("Failed to fetch user:", err);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchUser = async () => {
+  //     try {
+  //       const data = await dispatch(getUser()).unwrap();
+  //     } catch (err) {
+  //       console.error("Failed to fetch user:", err);
+  //     }
+  //   };
 
-    fetchUser();
-  }, [dispatch]);
+  //   fetchUser();
+  // }, [dispatch]);
 
   useEffect(() => {
     if (user) {

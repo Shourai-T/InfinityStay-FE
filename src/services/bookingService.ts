@@ -18,6 +18,7 @@ export const bookingService = {
           Authorization: `Bearer ${token}`,
         },
       });
+      // console.log('Create Booking API response:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('Create Booking error:', {
@@ -40,6 +41,7 @@ export const bookingService = {
         },
       });
       
+      // console.log('Get My Bookings API response:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('Get My Bookings error:', {
@@ -82,6 +84,7 @@ export const bookingService = {
           Authorization: `Bearer ${token}`,
         },
       });
+      // console.log('Cancel Booking API response:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('Cancel Booking error:', {
@@ -94,5 +97,5 @@ export const bookingService = {
 
 };
 
-// Also export as default for alternative import methods
+
 export default bookingService;

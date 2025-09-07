@@ -83,8 +83,8 @@ export default function Register() {
         confirmPassword: rest.confirmPassword,
       };
 
-
       const response = await authService.register(registerData);
+
       showToast.success("Đăng ký thành công! Vui lòng xác thực email của bạn");
 
       // Điều hướng với dữ liệu từ response
@@ -241,6 +241,7 @@ export default function Register() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 top-4 text-lavender-400 hover:text-lavender-300 transition-colors duration-300"
+                    tabIndex={-1}
                   >
                     {showPassword ? (
                       <EyeOff className="h-5 w-5" />
@@ -283,6 +284,7 @@ export default function Register() {
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-4 top-4 text-lavender-400 hover:text-lavender-300 transition-colors duration-300"
+                    tabIndex={-1}
                   >
                     {showConfirmPassword ? (
                       <EyeOff className="h-5 w-5" />

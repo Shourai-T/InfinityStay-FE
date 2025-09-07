@@ -53,10 +53,8 @@ export default function RoomDetailPage() {
 
   useEffect(() => {
     if (!slug) return;
-    console.log("Fetching room detail for slug:", slug);
 
     const idFromSlug = slug.split("-")[0];
-    console.log("Fetching room with ID:", idFromSlug);
 
     const fetchRoom = async () => {
       try {
@@ -84,25 +82,24 @@ export default function RoomDetailPage() {
     fetchRoom();
   }, [slug, navigate]);
 
+  const fetchReviews = async () => {
+    try {
+      setLoadingReviews(true);
+      const res = await axios.get(
+        `https://infinity-stay.mtri.online/api/comments/room/${idFromSlug}`
+      );
+      const reviewData = res.data.result || [];
+      setReviews(reviewData);
+    } catch (err) {
+      console.error("Failed to fetch reviews:", err);
+      setReviews([]);
+    } finally {
+      setLoadingReviews(false);
+    }
+  };
+
   useEffect(() => {
     if (!slug) return;
-    const fetchReviews = async () => {
-      try {
-        setLoadingReviews(true);
-        const res = await axios.get(
-          `https://infinity-stay.mtri.online/api/comments/room/${idFromSlug}`
-        );
-        // Giả sử API trả về { result: [...] }
-        const reviewData = res.data.result || [];
-        console.log("Fetched reviews:", reviewData);
-        setReviews(reviewData);
-      } catch (err) {
-        console.error("Failed to fetch reviews:", err);
-        setReviews([]);
-      } finally {
-        setLoadingReviews(false);
-      }
-    };
     fetchReviews();
   }, [slug]);
 
@@ -120,14 +117,12 @@ export default function RoomDetailPage() {
 
     setIsSubmittingReview(true);
     try {
-      // Gọi API gửi review nếu có backend endpoint
-      // await roomsService.addReview(room!.id, { ...newReview, userId: authState.user.id });
       await axios.post(
         "https://infinity-stay.mtri.online/api/comments",
         {
-          room: idFromSlug, // ID phòng hiện tại
-          userEmail: user.email, // Email người dùng
-          content: newReview.comment.trim(), // Nội dung đánh giá
+          room: idFromSlug,
+          userEmail: user.email,
+          content: newReview.comment.trim(),
         },
         {
           headers: {
@@ -138,6 +133,7 @@ export default function RoomDetailPage() {
 
       showToast.success("Đánh giá của bạn đã được gửi thành công!");
       setNewReview({ comment: "" });
+      await fetchReviews(); // Load lại đánh giá sau khi gửi thành công
     } catch (err) {
       showToast.error("Gửi đánh giá thất bại");
     } finally {
@@ -147,7 +143,6 @@ export default function RoomDetailPage() {
 
   const handleBooking = () => {
     dispatch(setSelectedRoom(room));
-    console.log("Selected room for booking:", room);
     navigate("/dat-phong");
   };
 

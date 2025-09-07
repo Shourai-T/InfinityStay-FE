@@ -19,18 +19,18 @@ const AdminHeader: React.FC<AdminHeaderProps> = () => {
     navigate("/dang-nhap");
   };
 
-  const notifications = [
-    { id: 1, text: "Có đơn đặt phòng mới", time: "5 phút trước" },
-    { id: 2, text: "Khách hàng vừa gửi tin nhắn", time: "30 phút trước" },
-    { id: 3, text: "Đơn hàng #123 đã thanh toán", time: "2 giờ trước" },
-  ];
+  // const notifications = [
+  //   { id: 1, text: "Có đơn đặt phòng mới", time: "5 phút trước" },
+  //   { id: 2, text: "Khách hàng vừa gửi tin nhắn", time: "30 phút trước" },
+  //   { id: 3, text: "Đơn hàng #123 đã thanh toán", time: "2 giờ trước" },
+  // ];
 
   return (
     <header className="bg-midnight-900/80 backdrop-blur-lg border-b border-royal-500/20 sticky top-0 z-40">
       <div className="flex items-center justify-end px-6 py-4">
         <div className="flex items-center gap-4">
           {/* Notification Bell */}
-          <div className="relative">
+          {/* <div className="relative">
             <button
               className="relative p-2 text-lavender-300 hover:text-white rounded-lg hover:bg-royal-500/10 transition-colors duration-300"
               onClick={() => setShowNotifications(!showNotifications)}
@@ -39,7 +39,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = () => {
               <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
             </button>
 
-            {/* Notification Dropdown */}
+            
             {showNotifications && (
               <div className="absolute right-0 mt-2 w-72 bg-midnight-800 border border-royal-500/20 rounded-xl shadow-lg z-50">
                 <div className="p-4 border-b border-midnight-700/50">
@@ -69,7 +69,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = () => {
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
 
           {/* Admin Info & Logout */}
           <div className="flex items-center gap-3">

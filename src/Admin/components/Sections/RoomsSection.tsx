@@ -121,30 +121,16 @@ const RoomsSection: React.FC<RoomsSectionProps> = ({
       const fileImages = roomForm.images?.filter(
         (img) => img instanceof File
       ) as File[];
-      console.log(`Processing ${fileImages.length} files to upload`);
 
       if (fileImages && fileImages.length > 0) {
-        fileImages.forEach((file, i) => {
+        fileImages.forEach((file) => {
           formData.append("files", file, file.name);
-          console.log(`Added file ${i + 1}: ${file.name}`);
         });
-      }
-
-      // Log FormData for debugging
-      for (let [key, value] of formData.entries()) {
-        console.log(
-          `${key}: ${value instanceof File ? `File: ${value.name}` : value}`
-        );
       }
 
       let response;
       if (editingRoom) {
-        // UPDATE ROOM - PATCH request
-        console.log(`Updating room with ID: ${editingRoom.id}`);
-
         response = await updateRoom(editingRoom.id, formData, token || "");
-
-        console.log("Room updated successfully:", response.data);
 
         // Update the room in the local state
         if (response.data && response.data.result) {

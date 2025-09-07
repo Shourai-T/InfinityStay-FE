@@ -23,8 +23,9 @@ export const register = createAsyncThunk(
   "auth/register",
   async (userData: RegisterPayload, { rejectWithValue }) => {
     try {
-      console.log('Register thunk - sending data:', userData);
+      // console.log('Register thunk - sending data:', userData);
       const response = await authService.register(userData);
+      // console.log('Register thunk - response:', response);
       return response;
     } catch (error: any) {
       console.error('Register thunk - error:', error);
@@ -89,7 +90,9 @@ export const login = createAsyncThunk(
   "auth/login",
   async (credentials: { email: string; password: string }, { rejectWithValue }) => {
     try {
+      // console.log('Login thunk - sending data:', credentials);
       const response = await authService.login(credentials);
+      // console.log('Login thunk - response:', response);
       return response;
     } catch (error: any) {
       console.error('Login thunk - error:', error);
