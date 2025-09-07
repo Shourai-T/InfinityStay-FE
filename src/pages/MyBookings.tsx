@@ -41,7 +41,14 @@ export default function MyBookings() {
 
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
   const [filter, setFilter] = useState<
-    "all" | "confirmed" | "canceled" | "checked_in"
+    | "all"
+    | "pending"
+    | "payment_url"
+    | "confirmed"
+    | "checked_in"
+    | "checked_out"
+    | "canceled"
+    | "failed"
   >("all");
 
   // Scroll lên đầu khi load component
@@ -113,9 +120,6 @@ export default function MyBookings() {
 
   const filteredBookings = Array.isArray(bookings)
     ? bookings.filter((booking: any) => {
-        // Ẩn các status không cần thiết ở mọi filter
-        const hiddenStatuses = ["failed", "pending", "payment_url"];
-        if (hiddenStatuses.includes(booking.status)) return false;
         if (filter === "all") return true;
         return booking.status === filter;
       })
@@ -129,6 +133,8 @@ export default function MyBookings() {
         return <CheckCircle className="h-5 w-5 text-emerald-400" />;
       case "canceled":
         return <XCircle className="h-5 w-5 text-red-400" />;
+      case "failed":
+        return <XCircle className="h-5 w-5 text-red-500" />;
       default:
         return <Clock className="h-5 w-5 text-lavender-400" />;
     }
@@ -249,9 +255,13 @@ export default function MyBookings() {
         <div className="card-luxury rounded-xl p-1 mb-8 inline-flex">
           {[
             { key: "all", label: "Tất cả" },
+            { key: "pending", label: "Đang xử lý" },
+            { key: "payment_url", label: "Chờ thanh toán" },
             { key: "confirmed", label: "Đã xác nhận" },
             { key: "checked_in", label: "Đã check in" },
+            { key: "checked_out", label: "Đã check out" },
             { key: "canceled", label: "Đã hủy" },
+            { key: "failed", label: "Thất bại" },
           ].map((tab) => (
             <button
               key={tab.key}
