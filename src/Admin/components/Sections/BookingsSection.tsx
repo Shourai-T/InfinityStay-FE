@@ -339,7 +339,7 @@ const BookingsSection: React.FC<BookingsSectionProps> = ({ bookings }) => {
     try {
       const token = localStorage.getItem("token");
       const url = `${API_URL}/booking/update-booking-status/${bookingId}`;
-      const payload = status;
+      const payload = { status };
       const config = {
         headers: { Authorization: `Bearer ${token}` },
       };

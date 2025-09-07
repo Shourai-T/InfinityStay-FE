@@ -69,15 +69,6 @@ const UserTable: React.FC<UserTableProps> = ({
               </td>
               <td className="py-4 px-4">
                 <div className="flex items-center space-x-2">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      user.status === "active"
-                        ? "bg-green-500/20 text-green-400"
-                        : "bg-gray-500/20 text-gray-400"
-                    }`}
-                  >
-                    {user.status === "active" ? "Hoạt động" : "Không hoạt động"}
-                  </span>
                   <button
                     // onClick={() => onToggleVerification(user.id)}
                     className={`p-1 rounded ${
