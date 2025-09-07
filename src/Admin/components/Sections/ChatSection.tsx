@@ -75,18 +75,68 @@ const ChatSection: React.FC<ChatSectionProps> = ({
         const convs = data.result?.items || [];
         setConversations(convs);
       });
-  }, []);
+    // Lắng nghe inboxUpdated để cập nhật lại list
+    if (!socketRef.current) {
+      socketRef.current = io(SOCKET_URL, {
+        transports: ["websocket"],
+        auth: { token: `${token}` },
+      });
+    }
+    const socket = socketRef.current;
+    // socket.off("chat:inboxUpdated");
+    socket.on("chat:inboxUpdated", () => {
+      console.log("Đã nhận sự kiện chat:inboxUpdated");
+      fetch(`${API_URL}/chat`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          const convs = data.result?.items || [];
+          setConversations(convs);
+          // Nếu đang ở phòng hiện tại thì reload messages
+          if (selectedUser) {
+            const conv = convs.find((c) => c.userEmail === selectedUser);
+            if (conv) {
+              fetch(`${API_URL}/chat/${conv._id}/messages`, {
+                headers: { Authorization: `Bearer ${token}` },
+              })
+                .then((res) => res.json())
+                .then((res) => {
+                  if (Array.isArray(res.result?.items)) {
+                    const formattedMessages = res.result.items.map(
+                      (msg: any) => {
+                        const isAdmin = msg.fromEmail === adminEmail;
+                        return {
+                          id: msg._id,
+                          text: msg.text,
+                          sender: isAdmin ? "admin" : "user",
+                          timestamp: new Date(msg.createdAt),
+                          senderName: isAdmin ? "Admin Support" : msg.fromEmail,
+                        };
+                      }
+                    );
+                    setChatMessages(formattedMessages);
+                  }
+                });
+            }
+          }
+        });
+    });
+    return () => {
+      socket.off("chat:inboxUpdated");
+    };
+  }, [selectedUser]);
 
+  // Chỉ join/leave khi selectedUser thay đổi, không phụ thuộc vào conversations
   useEffect(() => {
-    // Khi chọn user, join room và fetch messages
     if (!selectedUser) return;
+    // Tìm conversation hiện tại
     const conv = conversations.find((c) => c.userEmail === selectedUser);
     if (!conv) return;
 
     setConversationId(conv._id);
     setToUserEmail(conv.userEmail);
 
-    // Connect socket với Bearer token
     const token = localStorage.getItem("token");
     if (!socketRef.current) {
       socketRef.current = io(SOCKET_URL, {
@@ -96,7 +146,17 @@ const ChatSection: React.FC<ChatSectionProps> = ({
     }
     const socket = socketRef.current;
 
-    // Join room
+    socket.on("chat:inboxUpdated", () => {
+      fetch(`${API_URL}/chat`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          const convs = data.result?.items || [];
+          setConversations(convs);
+        });
+    });
+
     socket.emit("chat:joinRoom", {
       conversationId: conv._id,
       toUserEmail: conv.userEmail,
@@ -104,9 +164,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
 
     // Fetch messages
     fetch(`${API_URL}/chat/${conv._id}/messages`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
       .then((res) => {
@@ -121,15 +179,13 @@ const ChatSection: React.FC<ChatSectionProps> = ({
               senderName: isAdmin ? "Admin Support" : msg.fromEmail,
             };
           });
-
           setChatMessages(formattedMessages);
         }
       });
 
     socket.off("chat:newMessage");
-
-    // Khi có tin nhắn mới (từ user hoặc admin)
     socket.on("chat:newMessage", (msg: any) => {
+      console.log("chat:newMessage nhận được:", msg);
       const isAdmin = msg.fromEmail === adminEmail;
       const newMessage: ChatMessage = {
         id: msg._id || Date.now().toString(),
@@ -138,36 +194,17 @@ const ChatSection: React.FC<ChatSectionProps> = ({
         timestamp: new Date(msg.createdAt || Date.now()),
         senderName: isAdmin ? "Admin Support" : msg.fromEmail,
       };
-
-      // Thêm tin nhắn mới vào danh sách
       setChatMessages((prev) => [...prev, newMessage]);
     });
 
-    // Lắng nghe sự kiện chat:inboxUpdated để cập nhật lại conversations
-    // Sự kiện này không trả về data, chỉ cần gọi lại API để lấy danh sách mới
-    socket.off("chat:inboxUpdated");
-    socket.on("chat:inboxUpdated", () => {
-      fetch(`${API_URL}/chat`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          const convs = data.result?.items || [];
-          setConversations(convs);
-        });
-    });
-
     return () => {
-      // Leave room khi đổi user
       socket.emit("chat:leaveRoom", {
         conversationId: conv._id,
         toUserEmail: conv.userEmail,
       });
       socket.off("chat:inboxUpdated");
     };
-  }, [selectedUser, conversations, setChatMessages]);
+  }, [selectedUser, setChatMessages]);
 
   const handleSendMessage = () => {
     if (
@@ -184,7 +221,6 @@ const ChatSection: React.FC<ChatSectionProps> = ({
       toUserEmail,
       conversationId,
     });
-
     setNewMessage("");
   };
 
