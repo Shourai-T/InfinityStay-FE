@@ -22,10 +22,10 @@ import { RootState } from "../store";
 
 export default function Confirmation() {
   const navigate = useNavigate();
-  const latestBooking = useSelector(
-    (state: RootState) =>
-      state.booking.bookings[state.booking.bookings.length - 1]
-  );
+  // const latestBooking = useSelector(
+  //   (state: RootState) =>
+  //     state.booking.bookings[state.booking.bookings.length - 1]
+  // );
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -49,7 +49,7 @@ export default function Confirmation() {
   //   );
   // }
 
-  const nights = calculateNights(latestBooking.checkIn, latestBooking.checkOut);
+  // const nights = calculateNights(latestBooking.checkIn, latestBooking.checkOut);
 
   return (
     <div className="min-h-screen bg-gradient-luxury">
