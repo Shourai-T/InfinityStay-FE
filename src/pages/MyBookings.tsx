@@ -252,29 +252,31 @@ export default function MyBookings() {
         </div>
 
         {/* Filter Tabs */}
-        <div className="card-luxury rounded-xl p-1 mb-8 inline-flex">
-          {[
-            { key: "all", label: "Tất cả" },
-            { key: "pending", label: "Đang xử lý" },
-            { key: "payment_url", label: "Chờ thanh toán" },
-            { key: "confirmed", label: "Đã xác nhận" },
-            { key: "checked_in", label: "Đã check in" },
-            { key: "checked_out", label: "Đã check out" },
-            { key: "canceled", label: "Đã hủy" },
-            { key: "failed", label: "Thất bại" },
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setFilter(tab.key as any)}
-              className={`px-6 py-3 rounded-lg text-sm font-heading font-medium transition-all duration-300 ${
-                filter === tab.key
-                  ? "bg-gradient-royal text-white shadow-royal"
-                  : "text-lavender-300 hover:text-soft-white hover:bg-royal-500/10"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div className="card-luxury rounded-xl p-1 mb-8">
+          <div className="flex flex-nowrap gap-2 overflow-x-auto md:grid md:grid-cols-4 md:gap-4 md:overflow-visible">
+            {[
+              { key: "all", label: "Tất cả" },
+              { key: "pending", label: "Đang xử lý" },
+              { key: "payment_url", label: "Chờ thanh toán" },
+              { key: "confirmed", label: "Đã xác nhận" },
+              { key: "checked_in", label: "Đã check in" },
+              { key: "checked_out", label: "Đã check out" },
+              { key: "canceled", label: "Đã hủy" },
+              { key: "failed", label: "Thất bại" },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setFilter(tab.key as any)}
+                className={`min-w-[120px] px-6 py-3 rounded-lg text-sm font-heading font-medium transition-all duration-300 whitespace-nowrap ${
+                  filter === tab.key
+                    ? "bg-gradient-royal text-white shadow-royal"
+                    : "text-lavender-300 hover:text-soft-white hover:bg-royal-500/10"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Bookings List */}
