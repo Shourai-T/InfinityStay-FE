@@ -338,13 +338,14 @@ const BookingsSection: React.FC<BookingsSectionProps> = ({ bookings }) => {
   const handleUpdateStatus = async (bookingId: string, status: string) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.patch(
-        `${API_URL}/booking/update-booking-status/${bookingId}`,
-        status,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const url = `${API_URL}/booking/update-booking-status/${bookingId}`;
+      const payload = status;
+      const config = {
+        headers: { Authorization: `Bearer ${token}` },
+      };
+      console.log("PATCH request:", { url, payload, config });
+      const response = await axios.patch(url, payload, config);
+      console.log("PATCH response:", response);
       showToast.success("Cập nhật trạng thái thành công");
       fetchCalendarData(); // Refresh data
     } catch (err) {

@@ -21,6 +21,15 @@ export const HomeHero: React.FC<HomeHeroProps> = ({
   setSearchDates,
   onSearch,
 }) => {
+  React.useEffect(() => {
+    if (!searchDates.checkIn) {
+      const today = new Date().toISOString().split("T")[0];
+      setSearchDates({
+        ...searchDates,
+        checkIn: today,
+      });
+    }
+  }, []);
   return (
     <>
       {/* Hero Section */}

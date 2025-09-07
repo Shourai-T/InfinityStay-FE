@@ -17,6 +17,15 @@ const RoomsFilterSidebar: React.FC<RoomsFilterSidebarProps> = ({
 }) => {
   const dispatch = useDispatch();
 
+  // Nếu checkIn chưa có giá trị thì set mặc định là ngày hiện tại
+  React.useEffect(() => {
+    if (!filters.checkIn) {
+      const today = new Date().toISOString().split("T")[0];
+      setFilters((prev) => ({ ...prev, checkIn: today }));
+      dispatch(setDateRange({ checkIn: today, checkOut: filters.checkOut }));
+    }
+  }, []);
+
   const handleCheckInChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newCheckIn = e.target.value;
     setFilters((prev) => ({ ...prev, checkIn: newCheckIn }));
