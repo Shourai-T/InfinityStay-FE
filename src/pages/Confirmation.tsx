@@ -11,7 +11,6 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useBooking } from "../contexts/BookingContext";
 import {
   formatCurrency,
   formatDate,

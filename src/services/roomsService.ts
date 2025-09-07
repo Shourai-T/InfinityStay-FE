@@ -43,9 +43,9 @@ class RoomsService {
       type: r.roomType as Room["type"],
       price: r.priceByDay,
       maxGuests: r.maxPeople,
-      area: r.sizeRoom,          // map về area
+      area: r.sizeRoom ,
       amenities: r.amenities || [],
-      image: r.image || [],      // giữ array luôn (theo interface của bạn)
+      image: r.image || [],
       shortDescription: r.shortDescription || "",
       fullDescription: r.fullDescription || "",
     }));

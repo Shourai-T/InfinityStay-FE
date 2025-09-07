@@ -36,7 +36,7 @@ export const useRooms = (options: UseRoomsOptions = {}): UseRoomsReturn => {
       
       const response = await roomsService.getRooms({
         page,
-        limit: PAGINATION.ROOMS_PER_PAGE,
+        limit: 99,
         ...options.filters
       });
 
