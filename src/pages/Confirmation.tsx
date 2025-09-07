@@ -99,7 +99,7 @@ export default function Confirmation() {
           {/* Booking Details */}
           {/* <div className="lg:col-span-2 space-y-6">
             {/* Booking Info */}
-            <div className="card-luxury rounded-2xl p-8">
+            {/* <div className="card-luxury rounded-2xl p-8">
               <h2 className="text-2xl font-heading font-bold mb-6 text-soft-white border-b border-royal-500/30 pb-4">
                 Thông tin đặt phòng
               </h2>
@@ -142,10 +142,10 @@ export default function Confirmation() {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Guest Information */}
-            <div className="card-luxury rounded-2xl p-8">
+            {/* <div className="card-luxury rounded-2xl p-8">
               <h3 className="text-xl font-heading font-semibold mb-6 text-soft-white border-b border-royal-500/30 pb-4">
                 Thông tin khách hàng
               </h3>
@@ -203,7 +203,7 @@ export default function Confirmation() {
                   </div>
                 </div>
               )}
-            </div>
+            </div> */}
 
             {/* Check-in Instructions */}
             <div className="bg-royal-500/10 border border-royal-500/30 rounded-2xl p-8">
