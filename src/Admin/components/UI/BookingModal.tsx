@@ -190,8 +190,7 @@ export default function BookingModal({
               className="form-input w-full px-4 py-3 rounded-xl font-body"
             >
               <option value="BANK_TRANSFER">Chuyển khoản</option>
-              <option value="CASH">Tiền mặt</option>
-              <option value="CREDIT_CARD">Thẻ tín dụng</option>
+              <option value="CASH_ON_DELIVERY">Tiền mặt</option>
             </select>
           </div>
 

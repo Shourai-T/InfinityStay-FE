@@ -2,7 +2,7 @@ import axios from "axios";
 const API_URL = import.meta.env.VITE_API_URL;
 
 export const getRooms = async (token: string) => {
-  return axios.get(`${API_URL}/rooms`, {
+  return axios.get(`${API_URL}/rooms?limit=99`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 };
