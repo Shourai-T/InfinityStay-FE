@@ -127,10 +127,8 @@ const ChatSection: React.FC<ChatSectionProps> = ({
     };
   }, [selectedUser]);
 
-  // Chỉ join/leave khi selectedUser thay đổi, không phụ thuộc vào conversations
   useEffect(() => {
     if (!selectedUser) return;
-    // Tìm conversation hiện tại
     const conv = conversations.find((c) => c.userEmail === selectedUser);
     if (!conv) return;
 
@@ -204,7 +202,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
       });
       socket.off("chat:inboxUpdated");
     };
-  }, [selectedUser, setChatMessages]);
+  }, [selectedUser]);
 
   const handleSendMessage = () => {
     if (
